@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TalentSignal Agent</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script defer src="/static/main.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Deccan AI Catalyst</p>
+          <h1>TalentSignal Agent</h1>
+        </div>
+        <div class="topbar-actions">
+          <button id="loadSampleBtn" class="ghost-button" type="button" title="Load sample JD">Sample</button>
+          <button id="exportBtn" class="ghost-button" type="button" title="Export latest JSON">Export JSON</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="intake-panel" aria-label="Job description intake">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Input</p>
+              <h2>Job Description</h2>
+            </div>
+            <div class="control-row">
+              <label>
+                Top K
+                <select id="topK">
+                  <option value="5">5</option>
+                  <option value="8" selected>8</option>
+                  <option value="10">10</option>
+                  <option value="12">12</option>
+                </select>
+              </label>
+              <label class="toggle">
+                <input id="simulateOutreach" type="checkbox" checked />
+                <span>Outreach</span>
+              </label>
+            </div>
+          </div>
+
+          <textarea id="jdInput" spellcheck="true"></textarea>
+          <div class="action-row">
+            <button id="analyzeBtn" class="primary-button" type="button">Run Agent</button>
+            <p id="statusText" class="status-text">Ready</p>
+          </div>
+        </section>
+
+        <section class="run-panel" aria-label="Agent run">
+          <div class="stage-strip" id="stageStrip">
+            <span class="stage is-idle">Parse JD</span>
+            <span class="stage is-idle">Discover</span>
+            <span class="stage is-idle">Score</span>
+            <span class="stage is-idle">Engage</span>
+            <span class="stage is-idle">Rank</span>
+          </div>
+
+          <div id="summaryGrid" class="summary-grid"></div>
+
+          <div class="split-view">
+            <aside class="insight-rail">
+              <div class="section-heading tight">
+                <div>
+                  <p class="eyebrow">Parsed</p>
+                  <h2>Role Signal</h2>
+                </div>
+              </div>
+              <div id="parsedSpec" class="empty-state">Run the agent to parse the JD.</div>
+
+              <div class="section-heading tight lower">
+                <div>
+                  <p class="eyebrow">Search</p>
+                  <h2>Strategy</h2>
+                </div>
+              </div>
+              <div id="searchStrategy" class="empty-state">Candidate discovery plan appears here.</div>
+            </aside>
+
+            <section class="results-list" aria-label="Ranked shortlist">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Output</p>
+                  <h2>Ranked Shortlist</h2>
+                </div>
+              </div>
+              <div id="candidateResults" class="empty-state large">Paste a JD, run the agent, and review the shortlist.</div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

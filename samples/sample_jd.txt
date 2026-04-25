@@ -1,0 +1,17 @@
+Role: Senior AI Engineer - Agentic Talent Scouting
+
+We are building an AI-powered talent scouting and engagement agent for recruiters. The agent should parse job descriptions, discover matching candidates, score them with explainable match logic, simulate conversational outreach, and return a ranked shortlist that a recruiter can act on immediately.
+
+Responsibilities:
+- Build production-quality Python services and clean recruiter-facing workflows.
+- Design AI agents with tool calling, RAG, candidate matching, ranking, and evaluation loops.
+- Create transparent scoring for Match Score and Interest Score.
+- Work with candidate data responsibly, including privacy and human-in-the-loop review.
+
+Requirements:
+- 3+ years of experience building AI or ML products.
+- Strong Python and FastAPI.
+- Experience with LLMs, RAG, embeddings, vector databases, and prompt engineering.
+- Bonus: recruiting, talent sourcing, ATS integrations, LangGraph, observability, and privacy.
+
+Location: Remote or Bengaluru hybrid.
