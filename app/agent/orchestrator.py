@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from .data import SAMPLE_CANDIDATES
 from .decision_intelligence import (
+    build_business_impact,
     build_evidence_paths,
     build_recruiter_brief,
     confidence_score,
@@ -150,6 +151,7 @@ class TalentScoutingAgent:
             search_strategy=search_strategy,
             ranked_shortlist=ranked,
             recruiter_brief=build_recruiter_brief(ranked, job_spec),
+            business_impact=build_business_impact(ranked, profiles_analyzed=len(discovered)),
             summary=self._summary(ranked, job_spec),
             audit_log=audit_log,
         )

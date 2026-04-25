@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .schemas import CandidateAssessment, CandidateProfile, EvidencePath, JobSpec, RecruiterBrief, RiskSignal
+from .schemas import BusinessImpact, CandidateAssessment, CandidateProfile, EvidencePath, JobSpec, RecruiterBrief, RiskSignal
 
 
 def build_evidence_paths(
@@ -187,6 +187,66 @@ def build_recruiter_brief(ranked: list[CandidateAssessment], job_spec: JobSpec) 
         recommended_sequence=recommended_sequence,
         compliance_audit=compliance,
         demo_talking_points=talking_points,
+    )
+
+
+def build_business_impact(ranked: list[CandidateAssessment], profiles_analyzed: int) -> BusinessImpact:
+    manual_minutes_per_profile = 12
+    assisted_minutes_per_profile = 2
+    recruiter_cost_per_hour_inr = 1200
+    profiles = max(profiles_analyzed, len(ranked))
+
+    manual_hours = profiles * manual_minutes_per_profile / 60
+    assisted_hours = profiles * assisted_minutes_per_profile / 60
+    hours_saved = round(max(0, manual_hours - assisted_hours), 1)
+    cost_saved = int(round(hours_saved * recruiter_cost_per_hour_inr, -2))
+
+    top_three = ranked[:3]
+    avg_confidence = sum(item.confidence_score for item in top_three) / len(top_three) if top_three else 0
+    avg_match = sum(item.match_score for item in top_three) / len(top_three) if top_three else 0
+    high_risk_count = sum(
+        1
+        for item in top_three
+        for risk in item.risk_signals
+        if risk.severity == "high"
+    )
+    accuracy_proxy = round((avg_match * 0.6) + (avg_confidence * 0.4), 1)
+
+    return BusinessImpact(
+        profiles_analyzed=profiles,
+        recruiter_hours_saved=hours_saved,
+        estimated_cost_saved_inr=cost_saved,
+        throughput_lift=(
+            f"~{manual_minutes_per_profile / assisted_minutes_per_profile:.1f}x faster first-pass screening "
+            f"under the stated assumptions."
+        ),
+        quality_lift=(
+            f"Top-three evidence-weighted fit proxy is {accuracy_proxy}/100, "
+            "using match plus confidence rather than keyword overlap alone."
+        ),
+        accuracy_proxy=accuracy_proxy,
+        wasted_screen_reduction=(
+            "High-risk candidates are flagged before recruiter screens."
+            if high_risk_count
+            else "No high-risk top-three candidate detected; medium risks are still surfaced before screens."
+        ),
+        roi_summary=(
+            f"For this run, the agent reviewed {profiles} profiles and estimates {hours_saved} recruiter hours "
+            f"saved, or about INR {cost_saved:,} of screening effort before interviews."
+        ),
+        baseline_assumptions=[
+            "Manual first-pass profile review takes about 12 minutes per candidate.",
+            "Agent-assisted review takes about 2 minutes per candidate because the recruiter reviews ranked evidence.",
+            "Recruiter loaded cost is estimated at INR 1,200 per hour.",
+            "Quality lift is treated as an evidence-weighted proxy, not a final hiring accuracy claim.",
+        ],
+        recommended_kpis=[
+            "Time from JD intake to first shortlist",
+            "Recruiter minutes per qualified candidate",
+            "Top-3 shortlist acceptance rate by hiring manager",
+            "Candidate reply rate after personalized outreach",
+            "False positive screen rate",
+        ],
     )
 
 

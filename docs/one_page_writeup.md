@@ -2,7 +2,7 @@
 
 ## Approach
 
-TalentSignal Agent treats recruiting as a multi-step agent workflow, not a single prompt. The recruiter inputs a job description and can also paste resumes or candidate profiles. The system parses the role, converts resumes into structured candidate profiles, builds a sourcing strategy, discovers candidates from the provided resumes and/or a simulated market, computes explainable `Match Score`, simulates conversational outreach to estimate genuine interest, and returns a ranked shortlist with confidence, evidence paths, risks, interview questions, and next actions.
+TalentSignal Agent treats recruiting as a business workflow, not a single prompt. The recruiter inputs a job description and can also paste resumes or candidate profiles. The system parses the role, converts resumes into structured candidate profiles, builds a sourcing strategy, discovers candidates from the provided resumes and/or a simulated market, computes explainable `Match Score`, simulates conversational outreach to estimate genuine interest, and returns a ranked shortlist with confidence, evidence paths, risks, interview questions, ROI estimates, and next actions.
 
 ## Architecture
 
@@ -27,6 +27,16 @@ The final ranking uses:
 
 `Confidence Score` is shown separately. It measures how much evidence supports the ranking and penalizes missing skills, weak source depth, and disagreement between match and interest.
 
+## Business Outcome Thinking
+
+The agent explicitly models measurable business outcomes:
+
+- Cost reduction: recruiter hours saved and estimated INR screening effort avoided.
+- Throughput: first-pass screening speed compared with manual review.
+- Quality lift: evidence-weighted fit proxy using match plus confidence.
+- Waste reduction: risky candidates are flagged before recruiter screens.
+- Validation KPIs: time-to-shortlist, minutes per qualified candidate, top-3 hiring manager acceptance rate, candidate reply rate, and false positive screen rate.
+
 ## Trade-Offs
 
 The main trade-off is deterministic reliability versus live internet sourcing. For a hackathon submission, pasted resumes and a local simulated candidate market avoid API costs, scraping risk, rate limits, and demo instability. The discovery layer is still designed as a connector interface, so real sources can be added later without rewriting the scoring or UI.
@@ -41,6 +51,7 @@ The outreach is simulated rather than sent to real candidates. This keeps the de
 - Shows the conversation transcript and reservations behind the interest score.
 - Adds evidence paths, risk mitigations, and interview questions for each candidate.
 - Includes a compliance audit that avoids protected attributes and keeps the human recruiter accountable.
+- Shows ROI assumptions so judges can challenge or tune the model instead of trusting vague AI claims.
 - Includes counterfactuals that tell the recruiter what would change the ranking.
 - Runs locally with no paid API keys.
 
@@ -51,5 +62,6 @@ The outreach is simulated rather than sent to real candidates. This keeps the de
 3. Click `Run Agent`.
 4. Walk through parsed role signals: skills, seniority, location, domain.
 5. Show the discovery strategy and audit trace.
-6. Review the top candidate's match score, interest score, confidence, transcript, evidence paths, risks, and next steps.
-7. Export JSON and explain how it can be handed to a recruiter or ATS.
+6. Review the business outcome panel: profiles analyzed, hours saved, estimated cost saved, throughput, and quality proxy.
+7. Review the top candidate's match score, interest score, confidence, transcript, evidence paths, risks, and next steps.
+8. Export JSON and explain how it can be handed to a recruiter or ATS.

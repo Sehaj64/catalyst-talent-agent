@@ -118,11 +118,25 @@ class RecruiterBrief(BaseModel):
     demo_talking_points: list[str]
 
 
+class BusinessImpact(BaseModel):
+    profiles_analyzed: int
+    recruiter_hours_saved: float
+    estimated_cost_saved_inr: int
+    throughput_lift: str
+    quality_lift: str
+    accuracy_proxy: float
+    wasted_screen_reduction: str
+    roi_summary: str
+    baseline_assumptions: list[str]
+    recommended_kpis: list[str]
+
+
 class AgentRun(BaseModel):
     generated_at: datetime
     job_spec: JobSpec
     search_strategy: dict[str, list[str]]
     ranked_shortlist: list[CandidateAssessment]
     recruiter_brief: RecruiterBrief
+    business_impact: BusinessImpact
     summary: dict[str, str | int | float | list[str]]
     audit_log: list[str]

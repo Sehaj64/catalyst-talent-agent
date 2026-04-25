@@ -2,7 +2,7 @@
 
 AI-powered talent scouting and engagement agent for the Deccan AI Catalyst challenge.
 
-The app takes a job description plus optional pasted resumes/profiles, parses hiring requirements, discovers matching candidates from user-provided resumes and/or a simulated talent market, runs explainable match scoring, simulates conversational outreach, and returns a ranked shortlist with `Match Score`, `Interest Score`, `Confidence Score`, decision labels, transcript snippets, evidence paths, risk mitigations, interview questions, and recruiter next steps.
+The app takes a job description plus optional pasted resumes/profiles, parses hiring requirements, discovers matching candidates from user-provided resumes and/or a simulated talent market, runs explainable match scoring, simulates conversational outreach, and returns a ranked shortlist with `Match Score`, `Interest Score`, `Confidence Score`, ROI estimates, decision labels, transcript snippets, evidence paths, risk mitigations, interview questions, and recruiter next steps.
 
 ## Quick Start
 
@@ -23,6 +23,7 @@ Open `http://127.0.0.1:8000`.
 - Matching: explainable scoring with exact skills, adjacent skills, seniority fit, domain fit, evidence depth, logistics, and differentiators.
 - Conversational outreach: simulated personalized opener, candidate response, follow-up, constraints, reservations, and next action.
 - Ranked recruiter output: combined ranking based on match and interest, with confidence, evidence paths, risks, counterfactuals, interview questions, and a recruiter brief.
+- Business outcomes: estimated recruiter hours saved, screening cost saved, throughput lift, quality proxy, and KPIs to validate after deployment.
 - Documentation: architecture diagram, scoring logic, sample inputs and outputs, and one-page write-up.
 
 ## Architecture
@@ -38,8 +39,9 @@ flowchart LR
     E --> F["Outreach Simulator"]
     F --> G["Ranker"]
     G --> H["Decision Intelligence"]
-    H --> I["Recruiter Console"]
-    H --> J["JSON Export"]
+    H --> ROI["Business Impact Model"]
+    ROI --> I["Recruiter Console"]
+    ROI --> J["JSON Export"]
 
     B --> B1["Skills, seniority, domains, constraints"]
     E --> E1["Explainable score breakdown"]
@@ -62,6 +64,16 @@ flowchart LR
 `Combined Score = Match Score * 0.65 + Interest Score * 0.35`
 
 `Confidence Score` is not used to inflate ranking. It tells the recruiter how much evidence supports the ranking by looking at source depth, evidence paths, score agreement, responsiveness, and missing skill penalties.
+
+## Business Outcome Model
+
+The prototype is framed around measurable recruiting ROI:
+
+- Cost reduction: estimates recruiter screening hours saved and equivalent effort cost.
+- Throughput: compares manual first-pass review against agent-assisted review.
+- Quality lift: uses an evidence-weighted fit proxy from `Match Score` and `Confidence Score`.
+- Waste reduction: flags risky candidates before recruiter screens.
+- KPIs: time-to-shortlist, recruiter minutes per qualified candidate, top-3 hiring manager acceptance rate, reply rate, and false positive screen rate.
 
 ## Why This Is Different
 

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-25T17:56:51.695680Z",
+  "generated_at": "2026-04-25T17:59:23.789834Z",
   "job_spec": {
     "original_text": "Role: Senior AI Engineer - Agentic Talent Scouting\n\nWe are building an AI-powered talent scouting and engagement agent for recruiters. The agent should parse job descriptions, discover matching candidates, score them with explainable match logic, simulate conversational outreach, and return a ranked shortlist that a recruiter can act on immediately.\n\nResponsibilities:\n- Build production-quality Python services and clean recruiter-facing workflows.\n- Design AI agents with tool calling, RAG, candidate matching, ranking, and evaluation loops.\n- Create transparent scoring for Match Score and Interest Score.\n- Work with candidate data responsibly, including privacy and human-in-the-loop review.\n\nRequirements:\n- 3+ years of experience building AI or ML products.\n- Strong Python and FastAPI.\n- Experience with LLMs, RAG, embeddings, vector databases, and prompt engineering.\n- Bonus: recruiting, talent sourcing, ATS integrations, LangGraph, observability, and privacy.\n\nLocation: Remote or Bengaluru hybrid.",
     "title": "AI Engineer",
@@ -1190,6 +1190,29 @@
       "The system separates role match from candidate interest, then combines them transparently.",
       "Every top candidate includes evidence paths, risk mitigations, transcript, and next-best action.",
       "The discovery layer is swappable for GitHub, ATS, CRM, or a consented talent graph."
+    ]
+  },
+  "business_impact": {
+    "profiles_analyzed": 12,
+    "recruiter_hours_saved": 2.0,
+    "estimated_cost_saved_inr": 2400,
+    "throughput_lift": "~6.0x faster first-pass screening under the stated assumptions.",
+    "quality_lift": "Top-three evidence-weighted fit proxy is 86.9/100, using match plus confidence rather than keyword overlap alone.",
+    "accuracy_proxy": 86.9,
+    "wasted_screen_reduction": "No high-risk top-three candidate detected; medium risks are still surfaced before screens.",
+    "roi_summary": "For this run, the agent reviewed 12 profiles and estimates 2.0 recruiter hours saved, or about INR 2,400 of screening effort before interviews.",
+    "baseline_assumptions": [
+      "Manual first-pass profile review takes about 12 minutes per candidate.",
+      "Agent-assisted review takes about 2 minutes per candidate because the recruiter reviews ranked evidence.",
+      "Recruiter loaded cost is estimated at INR 1,200 per hour.",
+      "Quality lift is treated as an evidence-weighted proxy, not a final hiring accuracy claim."
+    ],
+    "recommended_kpis": [
+      "Time from JD intake to first shortlist",
+      "Recruiter minutes per qualified candidate",
+      "Top-3 shortlist acceptance rate by hiring manager",
+      "Candidate reply rate after personalized outreach",
+      "False positive screen rate"
     ]
   },
   "summary": {

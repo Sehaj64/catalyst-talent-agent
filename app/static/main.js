@@ -10,6 +10,7 @@ const resumeInput = document.querySelector("#resumeInput");
 const resumeFile = document.querySelector("#resumeFile");
 const statusText = document.querySelector("#statusText");
 const summaryGrid = document.querySelector("#summaryGrid");
+const businessImpact = document.querySelector("#businessImpact");
 const recruiterBrief = document.querySelector("#recruiterBrief");
 const parsedSpec = document.querySelector("#parsedSpec");
 const searchStrategy = document.querySelector("#searchStrategy");
@@ -97,6 +98,7 @@ async function analyze() {
 
 function renderRun(run) {
   renderSummary(run);
+  renderBusinessImpact(run.business_impact);
   renderRecruiterBrief(run.recruiter_brief);
   renderParsedSpec(run.job_spec);
   renderSearchStrategy(run.search_strategy, run.audit_log);
@@ -111,6 +113,55 @@ function renderSummary(run) {
     metric("Avg Interest", summary.average_interest_score),
     metric("Avg Confidence", summary.average_confidence_score),
   ].join("");
+}
+
+function renderBusinessImpact(impact) {
+  businessImpact.className = "impact-panel ready";
+  businessImpact.innerHTML = `
+    <div class="impact-head">
+      <div>
+        <p class="eyebrow">ROI</p>
+        <h3>Business Outcome Model</h3>
+        <p>${escapeHtml(impact.roi_summary)}</p>
+      </div>
+      <div class="impact-badge">
+        <span>Accuracy Proxy</span>
+        <strong>${escapeHtml(String(impact.accuracy_proxy))}</strong>
+      </div>
+    </div>
+    <div class="impact-grid">
+      <div class="impact-item">
+        <span>Profiles</span>
+        <strong>${escapeHtml(String(impact.profiles_analyzed))}</strong>
+        <p>Analyzed in this run.</p>
+      </div>
+      <div class="impact-item">
+        <span>Hours Saved</span>
+        <strong>${escapeHtml(String(impact.recruiter_hours_saved))}</strong>
+        <p>Estimated first-pass screening time saved.</p>
+      </div>
+      <div class="impact-item">
+        <span>Cost Saved</span>
+        <strong>INR ${escapeHtml(String(impact.estimated_cost_saved_inr.toLocaleString("en-IN")))}</strong>
+        <p>Estimated recruiter effort avoided.</p>
+      </div>
+      <div class="impact-item">
+        <span>Throughput</span>
+        <strong>${escapeHtml(impact.throughput_lift.split(" ")[0])}</strong>
+        <p>${escapeHtml(impact.throughput_lift)}</p>
+      </div>
+      <div class="impact-item">
+        <span>Quality</span>
+        <strong>Evidence-weighted</strong>
+        <p>${escapeHtml(impact.quality_lift)}</p>
+      </div>
+      <div class="impact-item">
+        <span>Waste Reduced</span>
+        <strong>Risk-first</strong>
+        <p>${escapeHtml(impact.wasted_screen_reduction)}</p>
+      </div>
+    </div>
+  `;
 }
 
 function renderRecruiterBrief(brief) {

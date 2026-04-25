@@ -13,8 +13,9 @@ flowchart TD
     F --> G["Outreach Agent"]
     G --> H["Ranker"]
     H --> I["Decision Intelligence"]
-    I --> J["Recruiter Console"]
-    I --> K["JSON Export"]
+    I --> BI["Business Impact Model"]
+    BI --> J["Recruiter Console"]
+    BI --> K["JSON Export"]
 
     C --> C1["title, seniority, skills, domains, constraints"]
     D --> D1["queries, sources, filters"]
@@ -22,6 +23,7 @@ flowchart TD
     G --> G1["personalized opener, response, reservations"]
     H --> H1["combined score and decision label"]
     I --> I1["confidence, evidence paths, risks, interview questions"]
+    BI --> BI1["hours saved, cost saved, throughput, quality proxy"]
 ```
 
 ## Components
@@ -45,11 +47,11 @@ Runs simulated candidate engagement. It creates personalized outreach, candidate
 Coordinates the full run and returns a ranked shortlist.
 
 `app/agent/decision_intelligence.py`
-Adds the interview-grade layer: confidence scores, evidence paths, risk signals, mitigations, tailored interview questions, compliance audit, and a recruiter brief.
+Adds the interview-grade layer: confidence scores, evidence paths, risk signals, mitigations, tailored interview questions, compliance audit, recruiter brief, and business impact model.
 
 `app/main.py`
 FastAPI service exposing the web console and JSON API.
 
 ## Design Choice
 
-The prototype is deterministic and local-first. That makes it reliable for judging, easy to inspect, and safe to run without external credits. In production, an LLM can improve extraction and dialogue generation, but the score pipeline should remain auditable. The most defensible part is the separation between match, interest, and confidence, because recruiters need to know not just who is ranked first, but why the system believes that ranking.
+The prototype is deterministic and local-first. That makes it reliable for judging, easy to inspect, and safe to run without external credits. In production, an LLM can improve extraction and dialogue generation, but the score pipeline should remain auditable. The most defensible part is the separation between match, interest, confidence, and business impact, because recruiters need to know not just who is ranked first, but why the system believes that ranking and what ROI the workflow creates.
