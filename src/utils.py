@@ -2,178 +2,127 @@ import json
 import re
 import docx
 import pypdf
+import pandas as pd
 import google.generativeai as genai
 import streamlit as st
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
-# --- API Configuration Helper ---
+# --- API Configuration ---
 def configure_gemini(api_key: str):
     try:
         genai.configure(api_key=api_key)
     except Exception as e:
         st.error(f"Failed to configure Gemini API: {e}")
 
-# --- File Parsers ---
+# --- File Parsers (PDF, DOCX, CSV, EXCEL) ---
 def read_docx(file: Any) -> str:
     try:
         doc = docx.Document(file)
         text = "\n".join([p.text for p in doc.paragraphs])
         return text.strip()
-    except Exception as e:
-        st.error(f"Error reading DOCX ({file.name}): {e}")
-        return ""
+    except Exception: return ""
 
 def read_pdf(file: Any) -> str:
     try:
         pdf_reader = pypdf.PdfReader(file)
         text = "\n".join([page.extract_text() for page in pdf_reader.pages if page.extract_text()])
         return text.strip()
-    except Exception as e:
-        st.error(f"Error reading PDF ({file.name}): {e}")
-        return ""
+    except Exception: return ""
 
-# --- Helper for JSON parsing from LLM ---
-def safe_json_loads(text: str, fallback: Any) -> Any:
-    """Attempt to parse JSON, cleaning common LLM markdown noise."""
+def read_excel_csv(file: Any) -> str:
+    """Parses CSV and Excel files into a text format for the AI."""
     try:
-        # Remove markdown code blocks if present
+        if file.name.endswith('.csv'):
+            df = pd.read_csv(file)
+        else:
+            df = pd.read_excel(file)
+        return df.to_string(index=False)
+    except Exception: return ""
+
+# --- Helper for Robust JSON Extraction ---
+def safe_json_loads(text: str, fallback: Any) -> Any:
+    try:
+        # Clean markdown code blocks
         clean_text = re.sub(r'```json\s*|\s*```', '', text).strip()
+        # Find the first { and last }
+        start = clean_text.find('{')
+        end = clean_text.rfind('}') + 1
+        if start != -1 and end != 0:
+            return json.loads(clean_text[start:end])
         return json.loads(clean_text)
-    except Exception as e:
-        st.warning(f"Failed to parse AI response as JSON. Using fallback. Error: {e}")
-        # Try finding anything that looks like a JSON object
-        try:
-            match = re.search(r'\{.*\}', clean_text, re.DOTALL)
-            if match:
-                return json.loads(match.group())
-        except:
-            pass
+    except Exception:
         return fallback
 
 # --- Advanced AI Extraction ---
 def analyze_job_description(jd_text: str, api_key: str) -> Dict[str, Any]:
-    """Uses LLM to deeply understand the Job Description requirements."""
     configure_gemini(api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash', generation_config={"response_mime_type": "application/json"})
+    # Using a stable model config to avoid Schema errors
+    model = genai.GenerativeModel('gemini-1.5-pro')
     
     prompt = f"""
-    Analyze this Job Description and extract the key requirements in JSON format.
-    Required Schema:
+    Analyze this Job Description and extract key requirements.
+    Return ONLY a JSON object:
     {{
         "job_title": "string",
         "core_skills": ["string"],
-        "years_experience_required": "string or number",
+        "years_experience_required": "string",
         "key_responsibilities": ["string"]
     }}
     
-    Job Description:
-    {jd_text[:4000]}
+    Job Description: {jd_text[:4000]}
     """
-    fallback = {"job_title": "Unknown Position", "core_skills": [], "years_experience_required": "N/A", "key_responsibilities": []}
+    fallback = {"job_title": "Unknown", "core_skills": [], "years_experience_required": "N/A", "key_responsibilities": []}
     try:
         response = model.generate_content(prompt)
-        if not response or not response.text:
-            return fallback
         return safe_json_loads(response.text, fallback)
-    except Exception as e:
-        st.error(f"AI Job Analysis failed: {e}")
-        return fallback
+    except Exception: return fallback
 
 def calculate_advanced_match(jd_data: Dict[str, Any], resume_text: str, api_key: str) -> Dict[str, Any]:
-    """Semantic matching engine returning score and reasoning."""
     configure_gemini(api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash', generation_config={"response_mime_type": "application/json"})
+    model = genai.GenerativeModel('gemini-1.5-pro')
     
     prompt = f"""
-    You are an expert technical recruiter. Evaluate the candidate's resume against the job requirements.
-    Output a JSON object with a strict match score (0-100) and specific reasoning.
-    
-    Job Requirements:
-    {json.dumps(jd_data)}
-    
-    Resume:
-    {resume_text[:5000]}
-    
-    Required Schema:
+    Evaluate the resume against these requirements.
+    Return ONLY a JSON object:
     {{
         "match_score": integer (0-100),
-        "explanation": "2-3 sentences explaining exactly why they fit or what is missing",
+        "explanation": "2-3 sentences explaining fit",
         "extracted_candidate_skills": ["string"]
     }}
+    
+    Requirements: {json.dumps(jd_data)}
+    Resume: {resume_text[:5000]}
     """
-    fallback = {"match_score": 0, "explanation": "Could not complete analysis.", "extracted_candidate_skills": []}
+    fallback = {"match_score": 0, "explanation": "Failed to analyze.", "extracted_candidate_skills": []}
     try:
         response = model.generate_content(prompt)
-        if not response or not response.text:
-            return fallback
         return safe_json_loads(response.text, fallback)
-    except Exception as e:
-        st.error(f"AI Match Calculation failed: {e}")
-        return fallback
+    except Exception: return fallback
 
-# --- Dynamic Conversational Engagement ---
+# --- Conversational Engagement ---
 def generate_initial_greeting(jd_data: Dict[str, Any], candidate_name: str, api_key: str) -> str:
-    """Starts the conversation dynamically based on JD context."""
     configure_gemini(api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    prompt = f"""
-    Act as an AI recruiter. Write a friendly, 1-2 sentence opening message to {candidate_name} 
-    about the {jd_data.get('job_title', 'open')} role. Ask a qualifying question about one of these core skills: {jd_data.get('core_skills', [])[:3]}.
-    """
+    model = genai.GenerativeModel('gemini-1.5-pro')
+    prompt = f"Write a 1-2 sentence recruiter opening for {candidate_name} for the {jd_data.get('job_title')} role. Mention one skill from {jd_data.get('core_skills', [])[:2]}."
     try:
-        response = model.generate_content(prompt)
-        if response and response.text:
-            return response.text.strip()
-        return f"Hi {candidate_name}, I'm the AI recruiter for the {jd_data.get('job_title', 'open')} role. Are you interested in discussing your experience?"
-    except Exception as e:
-        return f"Hi {candidate_name}, I'm the AI recruiter. Are you still interested in the {jd_data.get('job_title', 'open')} role?"
+        return model.generate_content(prompt).text.strip()
+    except Exception: return f"Hi {candidate_name}, interested in the {jd_data.get('job_title')} role?"
 
 def get_agent_reply(chat_history: List[Dict[str, str]], jd_data: Dict[str, Any], api_key: str) -> str:
-    """Generates the next reply from the AI Recruiter."""
     configure_gemini(api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    
-    history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in chat_history])
-    
-    prompt = f"""
-    You are an AI Recruiter chatting with a candidate for the {jd_data.get('job_title', 'open')} position.
-    Core requirements: {jd_data.get('core_skills', [])}.
-    
-    Your goal is to assess their technical fit, salary expectations, and work model preference (remote/hybrid).
-    Ask ONE concise question at a time. Be natural and professional. If you have enough info, say "Thank you, I have all the information I need."
-    
-    Chat History:
-    {history_text}
-    
-    AI Recruiter's Next Reply:
-    """
+    model = genai.GenerativeModel('gemini-1.5-pro')
+    history = "\n".join([f"{m['role']}: {m['content']}" for m in chat_history])
+    prompt = f"You are a recruiter interviewing for {jd_data.get('job_title')}. Ask ONE follow-up question based on this history: {history}"
     try:
-        response = model.generate_content(prompt)
-        if response and response.text:
-            return response.text.strip()
-        return "Thank you for sharing that. Could you tell me more about your experience with the core skills mentioned?"
-    except Exception:
-        return "Interesting. Tell me more."
+        return model.generate_content(prompt).text.strip()
+    except Exception: return "Tell me more about your experience."
 
 def evaluate_final_interest(chat_history: List[Dict[str, str]], api_key: str) -> int:
-    """Calculates final interest and alignment score (0-100) from the conversation."""
     configure_gemini(api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    
-    history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in chat_history])
-    prompt = f"""
-    Analyze this recruiter-candidate chat. 
-    Score the candidate's 'Interest & Alignment' from 0 to 100 based on their enthusiasm, salary alignment, and responsiveness.
-    Return ONLY the integer number.
-    
-    Chat History:
-    {history_text}
-    """
+    model = genai.GenerativeModel('gemini-1.5-pro')
+    history = "\n".join([f"{m['role']}: {m['content']}" for m in chat_history])
+    prompt = f"Rate candidate interest (0-100) from this chat: {history}. Return ONLY the number."
     try:
-        response = model.generate_content(prompt)
-        if response and response.text:
-            score_match = re.search(r'\d+', response.text)
-            return int(score_match.group()) if score_match else 50
-        return 50
-    except Exception:
-        return 50
+        res = model.generate_content(prompt).text
+        return int(re.search(r'\d+', res).group())
+    except Exception: return 50
