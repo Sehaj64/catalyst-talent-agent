@@ -26,10 +26,10 @@ if not gemini_api_key:
     except:
         gemini_api_key = None
 
-if not gemini_api_key:
-    st.error("🔑 API Key Missing! Please set GOOGLE_API_KEY in your environment or Streamlit Secrets.")
-    st.info("How to fix: Create a .streamlit/secrets.toml file and add: GEMINI_API_KEY = 'your_key_here'")
-    st.stop()
+demo_mode = not bool(gemini_api_key)
+if demo_mode:
+    st.warning("⚠️ Running in Demo Mode (no Gemini API key detected). AI calls use local heuristic fallbacks.")
+    st.info("To enable live Gemini responses, set GOOGLE_API_KEY or .streamlit/secrets.toml with GEMINI_API_KEY.")
 
 # --- Session State Initialization ---
 if 'analysis_done' not in st.session_state:
@@ -47,11 +47,12 @@ st.markdown("Semantic Job Matching & Autonomous Candidate Engagement using Gemin
 # --- Sidebar ---
 with st.sidebar:
     st.header("1. Input Data")
+    st.caption(f"Mode: {'Demo (heuristics)' if demo_mode else 'Live Gemini'}")
     job_description_file = st.file_uploader("Upload Job Description", type=["docx", "pdf"])
     resume_files = st.file_uploader("Upload Resumes", type=["docx", "pdf"], accept_multiple_files=True)
     
     if st.button("Run Advanced AI Scout", type="primary"):
-        if job_description_file and resume_files and gemini_api_key:
+        if job_description_file and resume_files:
             try:
                 with st.spinner("🧠 AI is comprehending the Job Description..."):
                     if job_description_file.type == "application/pdf":
@@ -97,7 +98,7 @@ with st.sidebar:
             except Exception as e:
                 st.error(f"An error occurred during analysis: {e}")
         else:
-            st.error("Please provide JD, Resumes, and ensure API Key is set.")
+            st.error("Please provide both a Job Description and at least one resume.")
 
 # --- Main Dashboard ---
 if st.session_state.analysis_done:

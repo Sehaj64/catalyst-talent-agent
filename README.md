@@ -1,62 +1,154 @@
-# 🤖 Catalyst AI: Advanced Talent Agent
+# 🤖 Catalyst AI: AI-Powered Talent Scouting & Engagement Agent
 
-Catalyst AI is an autonomous recruiting agent that performs semantic matching between Job Descriptions and Resumes, followed by automated conversational engagement to qualify candidates.
+Catalyst AI is a Streamlit-based recruiting assistant that ingests a Job Description (JD), semantically matches candidate resumes, simulates recruiter outreach, and outputs a ranked shortlist using two dimensions:
 
-## 🚀 Features
-- **Semantic Matching**: Beyond keyword matching, it understands context using Gemini 1.5.
-- **Autonomous Engagement**: Generates dynamic interview questions based on JD requirements.
-- **ROI Ranking**: Combines technical fit and conversational interest into a final score.
+- **Match Score** (technical/profile fit)
+- **Interest Score** (candidate engagement/alignment from conversation)
 
-## 🛠️ Setup Instructions
+---
 
-1. **Clone the repository**
-2. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. **Set up your API Key**:
-   - Create a `.streamlit/secrets.toml` file in the root directory.
-   - Add your Gemini API key:
-     ```toml
-     GEMINI_API_KEY = "your_google_api_key_here"
-     ```
-   - Alternatively, set an environment variable: `export GOOGLE_API_KEY="your_key_here"`
+## ✅ Challenge Requirement Coverage
 
-4. **Run the app**:
-   ```bash
-   streamlit run app.py
-   ```
+| Requirement | Status | Where it is implemented |
+|---|---|---|
+| JD parsing | ✅ | `analyze_job_description()` in `src/utils.py` |
+| Candidate discovery + matching | ✅ (from uploaded resumes) | `calculate_advanced_match()` + ranking in `app.py` |
+| Explainability | ✅ | `explanation` field per candidate in match table |
+| Conversational outreach (simulated) | ✅ | Chat workflow in `app.py` (`generate_initial_greeting`, `get_agent_reply`) |
+| Interest scoring | ✅ | `evaluate_final_interest()` |
+| Combined ranked output | ✅ | Final shortlist tab in `app.py` (70% match + 30% interest) |
+
+> Note: Current candidate discovery is **upload-based** (recruiter uploads resumes). If needed, this can be extended to pull from ATS/LinkedIn/internal DB connectors.
+
+---
+
+## 🏗️ Architecture & Scoring Logic
+
+```mermaid
+flowchart TD
+    A[Upload JD (PDF/DOCX)] --> B[Text Extraction]
+    B --> C[LLM JD Analysis\n(job title, skills, responsibilities)]
+
+    D[Upload Candidate Resumes] --> E[Resume Text Extraction]
+    E --> F[LLM Semantic Match\nscore + explanation + skills]
+    C --> F
+
+    F --> G[Candidate Match Ranking]
+    G --> H[Interactive AI Outreach Chat]
+    H --> I[LLM Interest & Alignment Score]
+
+    G --> J[Final Score Engine]
+    I --> J
+    J --> K[Ranked Shortlist Table]
+```
+
+### Scoring formula
+
+- **Match Score**: `0–100` from semantic resume-vs-JD evaluation.
+- **Interest Score**: `0–100` from candidate conversation analysis.
+- **Final Score**: `0.7 * Match Score + 0.3 * Interest Score`
+
+The weighting is currently fixed and can be made configurable from the UI.
+
+---
+
+## 🚀 Working Prototype (Local Setup)
+
+### 1) Clone repository
+```bash
+git clone <your-public-repo-url>
+cd catalyst-talent-agent
+```
+
+### 2) Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3) Configure API key
+Create `.streamlit/secrets.toml`:
+```toml
+GEMINI_API_KEY = "your_google_api_key_here"
+```
+
+Or set env var:
+```bash
+export GOOGLE_API_KEY="your_google_api_key_here"
+```
+
+If you skip this step, the app still runs in **Demo Mode** using local heuristic scoring and scripted chat responses.
+
+### 4) Run app
+```bash
+streamlit run app.py
+```
+
+---
+
+## 🎬 Demo Video (3–5 min)
+
+Record a short walkthrough showing:
+1. Upload JD
+2. Upload 3–5 resumes
+3. Run AI scout and inspect explainable match output
+4. Simulate a short candidate chat
+5. End interview and view ranked shortlist
+
+Add your final link here:
+- **Demo Video URL**: `PASTE_VIDEO_LINK_HERE`
+
+---
+
+## 🧪 Sample Input & Output
+
+### Sample input (JD)
+A backend engineer role requiring Python, FastAPI, PostgreSQL, and cloud deployment experience.
+
+### Sample output (shortlist row)
+```json
+{
+  "name": "candidate_a.pdf",
+  "match_percentage": 86,
+  "interest_score": 78,
+  "final_score": 83.6,
+  "status": "Interviewed",
+  "explanation": "Strong overlap in Python/FastAPI/PostgreSQL with proven production experience. Minor gap in cloud cost-optimization ownership."
+}
+```
+
+---
+
+## 📦 Submission Checklist (for challenge handoff)
+
+Before submitting, ensure these are ready:
+
+- [ ] **Git repository URL**: `PASTE_REPO_URL_HERE`
+- [ ] **Git username**: `PASTE_GITHUB_USERNAME_HERE`
+- [ ] **Project documentation / README**: this file
+- [ ] **Demo video link (3–5 min)**: `PASTE_VIDEO_LINK_HERE`
+- [ ] **Project site URL** (if deployed): `PASTE_DEPLOYED_URL_HERE`
+
+### Deadline note
+Challenge deadline stated: **Monday, April 27, 1:00 AM IST**.
+
+---
 
 ## 🔍 Troubleshooting
 
-If the application is "not working", check the following:
+### API key missing
+- Error: `API Key Missing!`
+- Fix: Add `GEMINI_API_KEY` in `.streamlit/secrets.toml` or export `GOOGLE_API_KEY`.
 
-### 1. API Key Issues
-- **Error**: "API Key Missing!"
-- **Fix**: Ensure `GEMINI_API_KEY` is in `.streamlit/secrets.toml` or `GOOGLE_API_KEY` is in your environment.
+### Parsing failures
+- Ensure PDFs/DOCX files are valid and not password-protected.
 
-### 2. Import Errors
-- **Error**: `ModuleNotFoundError: No module named 'src'`
-- **Fix**: We've added `sys.path.append` to `app.py` to fix this. Ensure you run the app from the root directory of the project.
+### AI analysis failures
+- Check internet + API quota/model access (`gemini-1.5-flash`).
 
-### 3. File Parsing Failures
-- **Error**: "Could not extract text from Job Description"
-- **Fix**: Ensure your PDFs/DOCX files are not password-protected or corrupted. The app now includes better error logging for these cases.
+---
 
-### 4. AI Analysis Failures
-- **Error**: "AI Job Analysis failed" or "AI Match Calculation failed"
-- **Fix**: 
-  - Check your internet connection.
-  - Verify your Gemini API key has access to the `gemini-1.5-flash` model.
-  - The app now uses robust JSON parsing with fallbacks to handle inconsistent LLM responses.
+## 📁 Project Structure
 
-### 5. Dependency Issues
-- Ensure all packages in `requirements.txt` are installed. If you see errors related to `docx` or `pypdf`, try reinstalling them:
-  ```bash
-  pip install --force-reinstall python-docx pypdf
-  ```
-
-## 🏗️ Project Structure
-- `app.py`: Main Streamlit dashboard and UI logic.
-- `src/utils.py`: Core logic for file parsing, Gemini API interaction, and matching algorithms.
-- `requirements.txt`: List of required Python packages.
+- `app.py` — Streamlit UI and candidate workflow.
+- `src/utils.py` — file parsing, Gemini integration, matching, and scoring helpers.
+- `requirements.txt` — Python dependencies.
