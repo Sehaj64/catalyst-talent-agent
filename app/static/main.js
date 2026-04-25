@@ -1,9 +1,13 @@
 const jdInput = document.querySelector("#jdInput");
 const analyzeBtn = document.querySelector("#analyzeBtn");
 const loadSampleBtn = document.querySelector("#loadSampleBtn");
+const loadSampleResumesBtn = document.querySelector("#loadSampleResumesBtn");
 const exportBtn = document.querySelector("#exportBtn");
 const topK = document.querySelector("#topK");
 const simulateOutreach = document.querySelector("#simulateOutreach");
+const includeSampleMarket = document.querySelector("#includeSampleMarket");
+const resumeInput = document.querySelector("#resumeInput");
+const resumeFile = document.querySelector("#resumeFile");
 const statusText = document.querySelector("#statusText");
 const summaryGrid = document.querySelector("#summaryGrid");
 const recruiterBrief = document.querySelector("#recruiterBrief");
@@ -18,6 +22,13 @@ async function loadSample() {
   const response = await fetch("/api/sample-jd");
   const data = await response.json();
   jdInput.value = data.job_description;
+}
+
+async function loadSampleResumes() {
+  const response = await fetch("/api/sample-resumes");
+  const data = await response.json();
+  resumeInput.value = data.candidate_resumes;
+  setStatus("Sample resumes loaded.");
 }
 
 function setStatus(text) {
@@ -59,6 +70,8 @@ async function analyze() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         job_description,
+        candidate_resumes: resumeInput.value.trim(),
+        include_sample_market: includeSampleMarket.checked,
         top_k: Number(topK.value),
         simulate_outreach: simulateOutreach.checked,
       }),
@@ -311,6 +324,14 @@ function escapeHtml(value) {
 }
 
 loadSampleBtn.addEventListener("click", loadSample);
+loadSampleResumesBtn.addEventListener("click", loadSampleResumes);
 analyzeBtn.addEventListener("click", analyze);
 exportBtn.addEventListener("click", exportLatest);
+resumeFile.addEventListener("change", async () => {
+  const file = resumeFile.files && resumeFile.files[0];
+  if (!file) return;
+  resumeInput.value = await file.text();
+  setStatus(`Imported ${file.name}.`);
+});
 loadSample();
+loadSampleResumes();

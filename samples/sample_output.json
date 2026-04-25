@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-25T17:51:01.925301Z",
+  "generated_at": "2026-04-25T17:56:51.695680Z",
   "job_spec": {
     "original_text": "Role: Senior AI Engineer - Agentic Talent Scouting\n\nWe are building an AI-powered talent scouting and engagement agent for recruiters. The agent should parse job descriptions, discover matching candidates, score them with explainable match logic, simulate conversational outreach, and return a ranked shortlist that a recruiter can act on immediately.\n\nResponsibilities:\n- Build production-quality Python services and clean recruiter-facing workflows.\n- Design AI agents with tool calling, RAG, candidate matching, ranking, and evaluation loops.\n- Create transparent scoring for Match Score and Interest Score.\n- Work with candidate data responsibly, including privacy and human-in-the-loop review.\n\nRequirements:\n- 3+ years of experience building AI or ML products.\n- Strong Python and FastAPI.\n- Experience with LLMs, RAG, embeddings, vector databases, and prompt engineering.\n- Bonus: recruiting, talent sourcing, ATS integrations, LangGraph, observability, and privacy.\n\nLocation: Remote or Bengaluru hybrid.",
     "title": "AI Engineer",
@@ -77,6 +77,7 @@
       "\"LangGraph\" OR \"RAG\" \"ai engineer\""
     ],
     "sources": [
+      "user-provided resumes / pasted candidate profiles",
       "public GitHub/project portfolios (simulated)",
       "LinkedIn-style profile summaries (simulated)",
       "ATS and CRM exports (simulated)",
@@ -86,12 +87,224 @@
       "seniority: senior",
       "remote policy: remote",
       "domains: hrtech, security",
-      "evidence required: project, achievement, or public artifact"
+      "evidence required: project, achievement, or public artifact",
+      "resume evidence parsed into candidate profiles"
     ]
   },
   "ranked_shortlist": [
     {
       "rank": 1,
+      "candidate": {
+        "candidate_id": "resume-001",
+        "name": "Ishaan Kapoor",
+        "headline": "Builds agentic AI products with strong Python, FastAPI, LangGraph, RAG, embeddings, vector databases, and recruiter-facing UX.",
+        "current_title": "AI Product Engineer",
+        "years_experience": 4.5,
+        "location": "Bengaluru",
+        "target_locations": [
+          "Bengaluru",
+          "Remote"
+        ],
+        "open_to_remote": true,
+        "salary_expectation_lpa": 36,
+        "notice_period_days": 30,
+        "skills": [
+          "prompt engineering",
+          "vector databases",
+          "tool calling",
+          "evaluations",
+          "ai agents",
+          "embeddings",
+          "postgresql",
+          "langgraph",
+          "fastapi",
+          "ranking",
+          "python",
+          "docker",
+          "rag"
+        ],
+        "tools": [
+          "FastAPI",
+          "LangGraph",
+          "PostgreSQL",
+          "Docker"
+        ],
+        "domains": [
+          "hrtech"
+        ],
+        "projects": [
+          "Built a resume-to-shortlist agent that parsed JDs, normalized skills, ranked candidates, and generated recruiter notes.",
+          "Shipped a LangGraph support agent with tool calling, trace logs, and human approval before actions."
+        ],
+        "achievements": [
+          "Reduced screening time by 35% in a pilot workflow.",
+          "Created evaluation tests for extraction quality, ranking quality, and hallucination risk.",
+          "Preferences: open to remote or Bengaluru hybrid, likes ownership and agentic AI.",
+          "Notice: 30 days"
+        ],
+        "evidence": [
+          "Built a resume-to-shortlist agent that parsed JDs, normalized skills, ranked candidates, and generated recruiter notes.",
+          "Shipped a LangGraph support agent with tool calling, trace logs, and human approval before actions.",
+          "Reduced screening time by 35% in a pilot workflow.",
+          "Created evaluation tests for extraction quality, ranking quality, and hallucination risk.",
+          "Preferences: open to remote or Bengaluru hybrid, likes ownership and agentic AI."
+        ],
+        "preferences": [
+          "open to remote or hybrid",
+          "likes ownership and startup pace",
+          "interested in recruiting technology"
+        ],
+        "interest_drivers": [
+          "agentic ai",
+          "ai agents",
+          "ownership",
+          "prompt engineering",
+          "vector databases"
+        ],
+        "reservations": [
+          "validate logistics and expectations"
+        ],
+        "responsiveness": 0.9,
+        "public_source": "User-provided resume text"
+      },
+      "match_score": 90.6,
+      "interest_score": 87.0,
+      "confidence_score": 92.9,
+      "combined_score": 89.3,
+      "decision": "Priority shortlist",
+      "matched_skills": [
+        "ai agents",
+        "embeddings",
+        "evaluations",
+        "fastapi",
+        "langgraph",
+        "prompt engineering",
+        "python",
+        "rag",
+        "ranking",
+        "tool calling",
+        "vector databases"
+      ],
+      "related_skills": {
+        "human-in-the-loop": [
+          "ai agents",
+          "langgraph",
+          "tool calling"
+        ],
+        "observability": [
+          "docker"
+        ],
+        "llms": [
+          "ai agents",
+          "langgraph",
+          "tool calling"
+        ]
+      },
+      "missing_skills": [
+        "scoring models",
+        "privacy"
+      ],
+      "score_breakdown": {
+        "skill_alignment": 39.6,
+        "seniority_fit": 15.0,
+        "domain_fit": 7.0,
+        "evidence_depth": 12.0,
+        "logistics_fit": 7.8,
+        "differentiation": 9.2
+      },
+      "match_explanation": "Ishaan Kapoor scores 90.6/100 because of direct coverage in ai agents, embeddings, evaluations, fastapi, langgraph; adjacent depth for human-in-the-loop, observability, llms; domain overlap in hrtech. Main gaps: scoring models, privacy.",
+      "evidence_paths": [
+        {
+          "claim": "Direct evidence for ai agents",
+          "evidence": "Built a resume-to-shortlist agent that parsed JDs, normalized skills, ranked candidates, and generated recruiter notes.",
+          "source": "User-provided resume text",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for embeddings",
+          "evidence": "Built a resume-to-shortlist agent that parsed JDs, normalized skills, ranked candidates, and generated recruiter notes.",
+          "source": "User-provided resume text",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for evaluations",
+          "evidence": "Built a resume-to-shortlist agent that parsed JDs, normalized skills, ranked candidates, and generated recruiter notes.",
+          "source": "User-provided resume text",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for fastapi",
+          "evidence": "Built a resume-to-shortlist agent that parsed JDs, normalized skills, ranked candidates, and generated recruiter notes.",
+          "source": "User-provided resume text",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Adjacent evidence for missing/implicit human-in-the-loop",
+          "evidence": "Built a resume-to-shortlist agent that parsed JDs, normalized skills, ranked candidates, and generated recruiter notes. Related skills observed: ai agents, langgraph, tool calling.",
+          "source": "User-provided resume text",
+          "confidence": 0.68
+        },
+        {
+          "claim": "Adjacent evidence for missing/implicit observability",
+          "evidence": "Built a resume-to-shortlist agent that parsed JDs, normalized skills, ranked candidates, and generated recruiter notes. Related skills observed: docker.",
+          "source": "User-provided resume text",
+          "confidence": 0.68
+        }
+      ],
+      "outreach_hook": "Lead with their ai agents, embeddings, evaluations work: Built a resume-to-shortlist agent that parsed JDs, normalized skills, ranked candidates, and generated recruiter notes.",
+      "transcript": [
+        {
+          "speaker": "agent",
+          "intent": "personalized opener",
+          "message": "Hi Ishaan, I noticed your work on built a resume-to-shortlist agent that parsed jds, normalized skills, ranked candidates, and generated recruiter notes. We are hiring for AI Engineer and the role needs human-in-the-loop, tool calling, evaluations. Would you be open to a quick exploratory chat?",
+          "sentiment": "positive"
+        },
+        {
+          "speaker": "candidate",
+          "intent": "initial interest signal",
+          "message": "Yes, this is relevant. I am especially interested in agentic ai, and the AI Engineer scope sounds close to work I have already shipped.",
+          "sentiment": "positive"
+        },
+        {
+          "speaker": "agent",
+          "intent": "qualification follow-up",
+          "message": "Helpful. Before I shortlist you, I want to confirm three things: hands-on production evidence, availability, and what would make the role worth your time.",
+          "sentiment": "neutral"
+        },
+        {
+          "speaker": "candidate",
+          "intent": "constraints and motivation",
+          "message": "My notice period is 30 days and compensation expectation is around 36 LPA. The strongest pull is motivated by agentic ai. Main concern: validate logistics and expectations.",
+          "sentiment": "positive"
+        }
+      ],
+      "interview_questions": [
+        "Walk me through a shipped project where you used prompt engineering to solve a real user problem.",
+        "What would your first version of this talent-scouting agent do in week one, and what would you intentionally leave out?",
+        "How would you evaluate whether the agent's shortlist is actually useful to recruiters?",
+        "Show the trade-offs you would make around human-in-the-loop for speed versus reliability.",
+        "Where have you built something closest to scoring models, even if the stack name was different?",
+        "How would you prevent the agent from overusing sensitive candidate information?"
+      ],
+      "risk_signals": [
+        {
+          "label": "Skill validation needed",
+          "severity": "medium",
+          "rationale": "Missing direct evidence for scoring models, privacy.",
+          "mitigation": "Ask for a shipped example involving scoring models before final shortlist."
+        }
+      ],
+      "reservations": [
+        "validate logistics and expectations"
+      ],
+      "next_steps": [
+        "Send recruiter screen invite within 24 hours.",
+        "Ask for proof around human-in-the-loop in a shipped project."
+      ],
+      "counterfactual": "Would move up materially if they can show hands-on evidence for scoring models."
+    },
+    {
+      "rank": 2,
       "candidate": {
         "candidate_id": "cand-001",
         "name": "Aanya Rao",
@@ -309,7 +522,7 @@
       "counterfactual": "Would move up materially if they can show hands-on evidence for scoring models."
     },
     {
-      "rank": 2,
+      "rank": 3,
       "candidate": {
         "candidate_id": "cand-009",
         "name": "Neel Vohra",
@@ -527,7 +740,7 @@
       "counterfactual": "Would move up materially if they can show hands-on evidence for scoring models."
     },
     {
-      "rank": 3,
+      "rank": 4,
       "candidate": {
         "candidate_id": "cand-006",
         "name": "Vivek Menon",
@@ -746,287 +959,80 @@
       "counterfactual": "Would move up materially if they can show hands-on evidence for evaluations."
     },
     {
-      "rank": 4,
+      "rank": 5,
       "candidate": {
-        "candidate_id": "cand-010",
-        "name": "Pooja Bhat",
-        "headline": "Security-minded AI engineer focused on privacy and safe automation",
-        "current_title": "AI Security Engineer",
-        "years_experience": 5.2,
-        "location": "Bengaluru",
+        "candidate_id": "resume-002",
+        "name": "Kavya Menon",
+        "headline": "Recruiting-tech specialist with sourcing, ATS workflows, scoring models, analytics, and candidate engagement experience.",
+        "current_title": "Talent Intelligence Analyst",
+        "years_experience": 5.0,
+        "location": "Pune",
         "target_locations": [
-          "Bengaluru",
+          "Pune",
           "Remote"
         ],
         "open_to_remote": true,
-        "salary_expectation_lpa": 44,
+        "salary_expectation_lpa": 28,
         "notice_period_days": 30,
         "skills": [
-          "python",
-          "llms",
-          "ai agents",
-          "privacy",
-          "red teaming",
-          "evaluations",
-          "observability",
-          "api integration",
-          "docker"
-        ],
-        "tools": [
-          "OpenAI API",
-          "Promptfoo",
-          "FastAPI",
-          "Docker",
-          "OpenTelemetry"
-        ],
-        "domains": [
-          "security",
-          "enterprise",
-          "saas"
-        ],
-        "projects": [
-          "Built red-team tests for LLM agents handling sensitive customer records.",
-          "Designed PII detection and review workflows before agent actions were executed."
-        ],
-        "achievements": [
-          "Caught 37 high-risk prompt injection paths before launch.",
-          "Created a practical AI safety checklist used across three product teams."
-        ],
-        "evidence": [
-          "Blog post details prompt injection mitigation and PII minimization for agents.",
-          "Open-source examples include guarded tool execution and audit logs."
-        ],
-        "preferences": [
-          "wants serious AI safety culture",
-          "prefers teams with clear user value"
-        ],
-        "interest_drivers": [
-          "safe agents",
-          "privacy",
-          "ownership"
-        ],
-        "reservations": [
-          "may be less drawn to recruiter tooling unless privacy is central"
-        ],
-        "responsiveness": 0.76,
-        "public_source": "Simulated GitHub and security blog"
-      },
-      "match_score": 69.7,
-      "interest_score": 72.2,
-      "confidence_score": 82.8,
-      "combined_score": 70.6,
-      "decision": "Warm backup",
-      "matched_skills": [
-        "ai agents",
-        "evaluations",
-        "fastapi",
-        "llms",
-        "observability",
-        "privacy",
-        "python"
-      ],
-      "related_skills": {
-        "human-in-the-loop": [
-          "ai agents",
-          "llms",
-          "observability",
-          "privacy"
-        ],
-        "tool calling": [
-          "ai agents",
-          "llms"
-        ],
-        "prompt engineering": [
-          "evaluations"
-        ],
-        "langgraph": [
-          "ai agents",
-          "llms"
-        ]
-      },
-      "missing_skills": [
-        "ranking",
-        "scoring models",
-        "rag"
-      ],
-      "score_breakdown": {
-        "skill_alignment": 30.9,
-        "seniority_fit": 15.0,
-        "domain_fit": 7.0,
-        "evidence_depth": 4.4,
-        "logistics_fit": 7.8,
-        "differentiation": 4.6
-      },
-      "match_explanation": "Pooja Bhat scores 69.7/100 because of direct coverage in ai agents, evaluations, fastapi, llms, observability; adjacent depth for human-in-the-loop, tool calling, prompt engineering; domain overlap in security. Main gaps: ranking, scoring models, rag.",
-      "evidence_paths": [
-        {
-          "claim": "Direct evidence for ai agents",
-          "evidence": "Blog post details prompt injection mitigation and PII minimization for agents.",
-          "source": "Simulated GitHub and security blog",
-          "confidence": 0.88
-        },
-        {
-          "claim": "Direct evidence for evaluations",
-          "evidence": "Blog post details prompt injection mitigation and PII minimization for agents.",
-          "source": "Simulated GitHub and security blog",
-          "confidence": 0.88
-        },
-        {
-          "claim": "Direct evidence for fastapi",
-          "evidence": "Blog post details prompt injection mitigation and PII minimization for agents.",
-          "source": "Simulated GitHub and security blog",
-          "confidence": 0.88
-        },
-        {
-          "claim": "Direct evidence for llms",
-          "evidence": "Blog post details prompt injection mitigation and PII minimization for agents.",
-          "source": "Simulated GitHub and security blog",
-          "confidence": 0.88
-        },
-        {
-          "claim": "Adjacent evidence for missing/implicit human-in-the-loop",
-          "evidence": "Blog post details prompt injection mitigation and PII minimization for agents. Related skills observed: ai agents, llms, observability.",
-          "source": "Simulated GitHub and security blog",
-          "confidence": 0.68
-        },
-        {
-          "claim": "Adjacent evidence for missing/implicit tool calling",
-          "evidence": "Blog post details prompt injection mitigation and PII minimization for agents. Related skills observed: ai agents, llms.",
-          "source": "Simulated GitHub and security blog",
-          "confidence": 0.68
-        }
-      ],
-      "outreach_hook": "Lead with their ai agents, evaluations, fastapi work: Blog post details prompt injection mitigation and PII minimization for agents.",
-      "transcript": [
-        {
-          "speaker": "agent",
-          "intent": "personalized opener",
-          "message": "Hi Pooja, I noticed your work on built red-team tests for llm agents handling sensitive customer records. We are hiring for AI Engineer and the role needs human-in-the-loop, tool calling, evaluations. Would you be open to a quick exploratory chat?",
-          "sentiment": "positive"
-        },
-        {
-          "speaker": "candidate",
-          "intent": "initial interest signal",
-          "message": "Potentially. Safe Agents is interesting, but I would want to understand the roadmap, data access, and how production-ready the team expects this to be.",
-          "sentiment": "cautious"
-        },
-        {
-          "speaker": "agent",
-          "intent": "qualification follow-up",
-          "message": "Helpful. Before I shortlist you, I want to confirm three things: hands-on production evidence, availability, and what would make the role worth your time.",
-          "sentiment": "neutral"
-        },
-        {
-          "speaker": "candidate",
-          "intent": "constraints and motivation",
-          "message": "My notice period is 30 days and compensation expectation is around 44 LPA. The strongest pull is motivated by safe agents. Main concern: may be less drawn to recruiter tooling unless privacy is central.",
-          "sentiment": "cautious"
-        }
-      ],
-      "interview_questions": [
-        "Walk me through a shipped project where you used python to solve a real user problem.",
-        "What would your first version of this talent-scouting agent do in week one, and what would you intentionally leave out?",
-        "How would you evaluate whether the agent's shortlist is actually useful to recruiters?",
-        "Show the trade-offs you would make around human-in-the-loop for speed versus reliability.",
-        "Where have you built something closest to ranking, even if the stack name was different?",
-        "How would you prevent the agent from overusing sensitive candidate information?"
-      ],
-      "risk_signals": [
-        {
-          "label": "Skill validation needed",
-          "severity": "high",
-          "rationale": "Missing direct evidence for ranking, scoring models, rag.",
-          "mitigation": "Ask for a shipped example involving ranking before final shortlist."
-        }
-      ],
-      "reservations": [
-        "may be less drawn to recruiter tooling unless privacy is central"
-      ],
-      "next_steps": [
-        "Send a concise role brief and ask one targeted technical follow-up.",
-        "Ask for proof around human-in-the-loop in a shipped project."
-      ],
-      "counterfactual": "Would move up materially if they can show hands-on evidence for ranking."
-    },
-    {
-      "rank": 5,
-      "candidate": {
-        "candidate_id": "cand-005",
-        "name": "Sara Khan",
-        "headline": "Talent intelligence engineer combining sourcing workflows with AI matching",
-        "current_title": "Talent Intelligence Engineer",
-        "years_experience": 4.5,
-        "location": "Hyderabad",
-        "target_locations": [
-          "Remote",
-          "Hyderabad",
-          "Bengaluru"
-        ],
-        "open_to_remote": true,
-        "salary_expectation_lpa": 31,
-        "notice_period_days": 20,
-        "skills": [
-          "python",
-          "recruiting",
           "talent sourcing",
-          "ats",
-          "web scraping",
-          "embeddings",
           "scoring models",
-          "ranking",
-          "analytics",
           "postgresql",
-          "privacy"
+          "recruiting",
+          "analytics",
+          "ranking",
+          "privacy",
+          "python",
+          "ats"
         ],
         "tools": [
-          "Greenhouse",
-          "LinkedIn Recruiter",
-          "PostgreSQL",
-          "dbt",
-          "Metabase",
-          "BeautifulSoup"
+          "PostgreSQL"
         ],
         "domains": [
           "hrtech",
-          "sales",
-          "enterprise"
+          "security"
         ],
         "projects": [
-          "Created a talent market map that grouped candidates by skills, availability, and outreach likelihood.",
-          "Built ethical sourcing scripts that respected robots.txt and stored PII minimization metadata."
+          "Built a talent market map that segmented candidates by skills, seniority, availability, and reply likelihood.",
+          "Designed outreach templates and measured candidate interest signals across hiring funnels."
         ],
         "achievements": [
-          "Helped a recruiting team improve reply rates by 18% with segmented outreach hooks.",
-          "Designed a match-score rubric adopted by 9 recruiters."
+          "Improved recruiter reply rates by 18% using personalized hooks.",
+          "Built a transparent candidate scorecard used by hiring managers.",
+          "Preferences: remote work, recruiting domain, candidate engagement.",
+          "Notice: 20 days"
         ],
         "evidence": [
-          "Portfolio case study explains skill normalization and ATS enrichment.",
-          "Sample dashboard ranks candidates by match, freshness, and likelihood to engage."
+          "Built a talent market map that segmented candidates by skills, seniority, availability, and reply likelihood.",
+          "Designed outreach templates and measured candidate interest signals across hiring funnels.",
+          "Improved recruiter reply rates by 18% using personalized hooks.",
+          "Built a transparent candidate scorecard used by hiring managers.",
+          "Preferences: remote work, recruiting domain, candidate engagement."
         ],
         "preferences": [
-          "wants to build AI for recruiters",
-          "likes explainable scoring",
-          "prefers product-facing roles"
+          "open to remote or hybrid",
+          "interested in recruiting technology"
         ],
         "interest_drivers": [
           "recruiting domain",
           "candidate engagement",
-          "analytics"
+          "remote work",
+          "talent sourcing",
+          "scoring models"
         ],
         "reservations": [
-          "wants clarity on engineering depth expected"
+          "validate logistics and expectations"
         ],
-        "responsiveness": 0.89,
-        "public_source": "Simulated portfolio and recruiter-ops profile"
+        "responsiveness": 0.9,
+        "public_source": "User-provided resume text"
       },
-      "match_score": 72.2,
-      "interest_score": 61.8,
-      "confidence_score": 82.4,
-      "combined_score": 68.6,
+      "match_score": 74.6,
+      "interest_score": 70.0,
+      "confidence_score": 88.6,
+      "combined_score": 73.0,
       "decision": "Warm backup",
       "matched_skills": [
         "ats",
-        "embeddings",
         "privacy",
         "python",
         "ranking",
@@ -1042,15 +1048,16 @@
           "python"
         ],
         "rag": [
-          "embeddings",
           "ranking"
         ],
         "vector databases": [
-          "embeddings",
           "ranking"
         ],
         "observability": [
           "privacy"
+        ],
+        "embeddings": [
+          "ranking"
         ]
       },
       "missing_skills": [
@@ -1059,58 +1066,58 @@
         "ai agents"
       ],
       "score_breakdown": {
-        "skill_alignment": 31.1,
+        "skill_alignment": 30.6,
         "seniority_fit": 15.0,
-        "domain_fit": 7.0,
-        "evidence_depth": 5.6,
+        "domain_fit": 10.0,
+        "evidence_depth": 5.5,
         "logistics_fit": 7.8,
         "differentiation": 5.8
       },
-      "match_explanation": "Sara Khan scores 72.2/100 because of direct coverage in ats, embeddings, privacy, python, ranking; adjacent depth for human-in-the-loop, fastapi, rag; domain overlap in hrtech. Main gaps: tool calling, evaluations, ai agents.",
+      "match_explanation": "Kavya Menon scores 74.6/100 because of direct coverage in ats, privacy, python, ranking, recruiting; adjacent depth for human-in-the-loop, fastapi, rag; domain overlap in hrtech, security. Main gaps: tool calling, evaluations, ai agents.",
       "evidence_paths": [
         {
           "claim": "Direct evidence for ats",
-          "evidence": "Portfolio case study explains skill normalization and ATS enrichment.",
-          "source": "Simulated portfolio and recruiter-ops profile",
-          "confidence": 0.88
-        },
-        {
-          "claim": "Direct evidence for embeddings",
-          "evidence": "Portfolio case study explains skill normalization and ATS enrichment.",
-          "source": "Simulated portfolio and recruiter-ops profile",
+          "evidence": "Built a talent market map that segmented candidates by skills, seniority, availability, and reply likelihood.",
+          "source": "User-provided resume text",
           "confidence": 0.88
         },
         {
           "claim": "Direct evidence for privacy",
-          "evidence": "Portfolio case study explains skill normalization and ATS enrichment.",
-          "source": "Simulated portfolio and recruiter-ops profile",
+          "evidence": "Built a talent market map that segmented candidates by skills, seniority, availability, and reply likelihood.",
+          "source": "User-provided resume text",
           "confidence": 0.88
         },
         {
           "claim": "Direct evidence for python",
-          "evidence": "Portfolio case study explains skill normalization and ATS enrichment.",
-          "source": "Simulated portfolio and recruiter-ops profile",
+          "evidence": "Built a talent market map that segmented candidates by skills, seniority, availability, and reply likelihood.",
+          "source": "User-provided resume text",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for ranking",
+          "evidence": "Built a talent market map that segmented candidates by skills, seniority, availability, and reply likelihood.",
+          "source": "User-provided resume text",
           "confidence": 0.88
         },
         {
           "claim": "Adjacent evidence for missing/implicit human-in-the-loop",
-          "evidence": "Portfolio case study explains skill normalization and ATS enrichment. Related skills observed: privacy.",
-          "source": "Simulated portfolio and recruiter-ops profile",
+          "evidence": "Built a talent market map that segmented candidates by skills, seniority, availability, and reply likelihood. Related skills observed: privacy.",
+          "source": "User-provided resume text",
           "confidence": 0.68
         },
         {
           "claim": "Adjacent evidence for missing/implicit fastapi",
-          "evidence": "Portfolio case study explains skill normalization and ATS enrichment. Related skills observed: python.",
-          "source": "Simulated portfolio and recruiter-ops profile",
+          "evidence": "Built a talent market map that segmented candidates by skills, seniority, availability, and reply likelihood. Related skills observed: python.",
+          "source": "User-provided resume text",
           "confidence": 0.68
         }
       ],
-      "outreach_hook": "Lead with their ats, embeddings, privacy work: Portfolio case study explains skill normalization and ATS enrichment.",
+      "outreach_hook": "Lead with their ats, privacy, python work: Built a talent market map that segmented candidates by skills, seniority, availability, and reply likelihood.",
       "transcript": [
         {
           "speaker": "agent",
           "intent": "personalized opener",
-          "message": "Hi Sara, I noticed your work on created a talent market map that grouped candidates by skills, availability, and outreach likelihood. We are hiring for AI Engineer and the role needs human-in-the-loop, tool calling, evaluations. Would you be open to a quick exploratory chat?",
+          "message": "Hi Kavya, I noticed your work on built a talent market map that segmented candidates by skills, seniority, availability, and reply likelihood. We are hiring for AI Engineer and the role needs human-in-the-loop, tool calling, evaluations. Would you be open to a quick exploratory chat?",
           "sentiment": "positive"
         },
         {
@@ -1128,12 +1135,12 @@
         {
           "speaker": "candidate",
           "intent": "constraints and motivation",
-          "message": "My notice period is 20 days and compensation expectation is around 31 LPA. The strongest pull is remote preference matches. Main concern: wants clarity on engineering depth expected.",
+          "message": "My notice period is 30 days and compensation expectation is around 28 LPA. The strongest pull is motivated by scoring models. Main concern: validate logistics and expectations.",
           "sentiment": "cautious"
         }
       ],
       "interview_questions": [
-        "Walk me through a shipped project where you used python to solve a real user problem.",
+        "Walk me through a shipped project where you used talent sourcing to solve a real user problem.",
         "What would your first version of this talent-scouting agent do in week one, and what would you intentionally leave out?",
         "How would you evaluate whether the agent's shortlist is actually useful to recruiters?",
         "Show the trade-offs you would make around human-in-the-loop for speed versus reliability.",
@@ -1146,16 +1153,10 @@
           "severity": "high",
           "rationale": "Missing direct evidence for tool calling, evaluations, ai agents.",
           "mitigation": "Ask for a shipped example involving tool calling before final shortlist."
-        },
-        {
-          "label": "Engagement risk",
-          "severity": "medium",
-          "rationale": "Simulated outreach shows cautious or weak motivation.",
-          "mitigation": "Send a sharper role brief tied to the candidate's strongest motivation."
         }
       ],
       "reservations": [
-        "wants clarity on engineering depth expected"
+        "validate logistics and expectations"
       ],
       "next_steps": [
         "Send a concise role brief and ask one targeted technical follow-up.",
@@ -1166,14 +1167,14 @@
   ],
   "recruiter_brief": {
     "hiring_thesis": "For AI Engineer, prioritize candidates with shipped agent/RAG evidence, recruiting-domain pull, and enough availability to enter process quickly.",
-    "shortlist_strategy": "Interview Aanya Rao first, compare against Neel Vohra, and use risk mitigations to avoid wasting panel time.",
+    "shortlist_strategy": "Interview Ishaan Kapoor first, compare against Aanya Rao, and use risk mitigations to avoid wasting panel time.",
     "top_tradeoffs": [
+      "Ishaan Kapoor: Skill validation needed.",
       "Aanya Rao: Skill validation needed.",
-      "Neel Vohra: Skill validation needed.",
-      "Vivek Menon: Skill validation needed."
+      "Neel Vohra: Skill validation needed."
     ],
     "recommended_sequence": [
-      "Start with Aanya Rao because combined score and confidence are strongest.",
+      "Start with Ishaan Kapoor because combined score and confidence are strongest.",
       "Use candidate-specific interview questions instead of a generic screen.",
       "Validate the highest-severity risk before scheduling deep technical panels.",
       "Keep the next two candidates warm as backups with tailored outreach hooks."
@@ -1193,11 +1194,11 @@
   },
   "summary": {
     "total_shortlisted": 5,
-    "average_match_score": 74.5,
-    "average_interest_score": 77.1,
-    "average_confidence_score": 86.5,
-    "top_candidate": "Aanya Rao",
-    "recommended_action": "Start with Aanya Rao; they have the strongest combined evidence and interest signal.",
+    "average_match_score": 79.1,
+    "average_interest_score": 81.7,
+    "average_confidence_score": 89.7,
+    "top_candidate": "Ishaan Kapoor",
+    "recommended_action": "Start with Ishaan Kapoor; they have the strongest combined evidence and interest signal.",
     "risk_flags": [
       "Top candidates still have at least one skill gap to validate."
     ]
@@ -1205,7 +1206,8 @@
   "audit_log": [
     "Received job description and initialized scouting run.",
     "Parsed JD into title=AI Engineer, seniority=senior, skills=10 must-have/9 nice-to-have.",
-    "Discovered 12 candidate profiles from simulated public and ATS sources.",
+    "Parsed 3 user-provided resume profile(s) and included the simulated market.",
+    "Discovered 12 candidate profiles from resume and market sources.",
     "Computed match, interest, and combined ranking scores with explainable breakdowns.",
     "Generated evidence paths, confidence scores, risk mitigations, and interview questions.",
     "Returned top 5 candidates with next actions for the recruiter."

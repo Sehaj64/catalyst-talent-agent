@@ -8,6 +8,8 @@ from pydantic import BaseModel, Field
 
 class AnalyzeRequest(BaseModel):
     job_description: str = Field(..., min_length=80)
+    candidate_resumes: str | None = ""
+    include_sample_market: bool = True
     top_k: int = Field(default=8, ge=3, le=12)
     simulate_outreach: bool = True
 

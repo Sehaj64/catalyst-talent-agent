@@ -3,8 +3,11 @@
 ```mermaid
 flowchart TD
     A["Recruiter pastes JD"] --> B["JD Parser"]
+    R["Recruiter pastes resumes"] --> RP["Resume Parser"]
     B --> C["Parsed JobSpec"]
+    RP --> P["Imported Candidate Profiles"]
     C --> D["Discovery Agent"]
+    P --> D
     D --> E["Candidate Market"]
     E --> F["Match Scorer"]
     F --> G["Outreach Agent"]
@@ -26,8 +29,11 @@ flowchart TD
 `app/agent/jd_parser.py`
 Extracts structured hiring requirements from a raw job description.
 
+`app/agent/resume_parser.py`
+Extracts structured candidate profiles from pasted resumes or profile text.
+
 `app/agent/discovery.py`
-Builds sourcing queries and retrieves candidates from a simulated market. This is intentionally isolated so real GitHub, ATS, CRM, or consented profile connectors can replace the local dataset.
+Builds sourcing queries and retrieves candidates from user-provided resumes plus a simulated market. This is intentionally isolated so real GitHub, ATS, CRM, or consented profile connectors can replace the local dataset.
 
 `app/agent/scorer.py`
 Computes explainable `Match Score` with exact and adjacent skills, domain fit, seniority fit, project evidence, logistics, and differentiators.

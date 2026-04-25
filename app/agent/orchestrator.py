@@ -13,6 +13,7 @@ from .decision_intelligence import (
 from .discovery import CandidateDiscovery
 from .jd_parser import parse_job_description
 from .outreach import simulate_outreach
+from .resume_parser import parse_candidate_resumes
 from .schemas import AgentRun, CandidateAssessment, CandidateProfile, OutreachTurn
 from .scorer import decision_label, score_match
 
@@ -24,7 +25,14 @@ class TalentScoutingAgent:
         self.candidate_pool = candidate_pool or SAMPLE_CANDIDATES
         self.discovery = CandidateDiscovery(self.candidate_pool)
 
-    def run(self, job_description: str, top_k: int = 8, simulate: bool = True) -> AgentRun:
+    def run(
+        self,
+        job_description: str,
+        top_k: int = 8,
+        simulate: bool = True,
+        candidate_resumes: str | None = "",
+        include_sample_market: bool = True,
+    ) -> AgentRun:
         audit_log: list[str] = ["Received job description and initialized scouting run."]
         job_spec = parse_job_description(job_description)
         audit_log.append(
@@ -32,9 +40,28 @@ class TalentScoutingAgent:
             f"skills={len(job_spec.must_have_skills)} must-have/{len(job_spec.nice_to_have_skills)} nice-to-have."
         )
 
-        search_strategy = self.discovery.build_search_strategy(job_spec)
-        discovered = self.discovery.discover(job_spec, limit=max(top_k + 4, 12))
-        audit_log.append(f"Discovered {len(discovered)} candidate profiles from simulated public and ATS sources.")
+        imported_candidates = parse_candidate_resumes(candidate_resumes)
+        candidate_pool = []
+        if include_sample_market:
+            candidate_pool.extend(self.candidate_pool)
+        candidate_pool.extend(imported_candidates)
+        if not candidate_pool:
+            candidate_pool.extend(self.candidate_pool)
+            audit_log.append("No resume candidates were provided, so the simulated market was used as fallback.")
+        elif imported_candidates:
+            audit_log.append(
+                f"Parsed {len(imported_candidates)} user-provided resume profile(s) and "
+                f"{'included' if include_sample_market else 'excluded'} the simulated market."
+            )
+
+        discovery = CandidateDiscovery(candidate_pool)
+        search_strategy = discovery.build_search_strategy(job_spec)
+        if imported_candidates:
+            search_strategy["sources"].insert(0, "user-provided resumes / pasted candidate profiles")
+            search_strategy["filters"].append("resume evidence parsed into candidate profiles")
+        discovered = discovery.discover(job_spec, limit=max(top_k + 4, min(12, len(candidate_pool))))
+        source_label = "resume and market sources" if imported_candidates else "simulated public and ATS sources"
+        audit_log.append(f"Discovered {len(discovered)} candidate profiles from {source_label}.")
 
         assessments: list[CandidateAssessment] = []
         for candidate in discovered:

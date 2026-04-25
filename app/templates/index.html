@@ -16,6 +16,7 @@
         </div>
         <div class="topbar-actions">
           <button id="loadSampleBtn" class="ghost-button" type="button" title="Load sample JD">Sample</button>
+          <button id="loadSampleResumesBtn" class="ghost-button" type="button" title="Load sample resumes">Resumes</button>
           <button id="exportBtn" class="ghost-button" type="button" title="Export latest JSON">Export JSON</button>
         </div>
       </header>
@@ -41,10 +42,25 @@
                 <input id="simulateOutreach" type="checkbox" checked />
                 <span>Outreach</span>
               </label>
+              <label class="toggle">
+                <input id="includeSampleMarket" type="checkbox" checked />
+                <span>Market</span>
+              </label>
             </div>
           </div>
 
           <textarea id="jdInput" spellcheck="true"></textarea>
+          <div class="resume-header">
+            <div>
+              <p class="eyebrow">Candidates</p>
+              <h2>Resumes / Profiles</h2>
+            </div>
+            <label class="file-control">
+              Import .txt
+              <input id="resumeFile" type="file" accept=".txt,.md,.csv" />
+            </label>
+          </div>
+          <textarea id="resumeInput" class="resume-input" spellcheck="true" placeholder="Paste one or more resumes here. Separate multiple candidates with ---"></textarea>
           <div class="action-row">
             <button id="analyzeBtn" class="primary-button" type="button">Run Agent</button>
             <p id="statusText" class="status-text">Ready</p>

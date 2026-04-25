@@ -30,6 +30,58 @@ Requirements:
 Location: Remote or Bengaluru hybrid.
 """
 
+SAMPLE_RESUMES = """Name: Ishaan Kapoor
+Current Title: AI Product Engineer
+Location: Bengaluru
+Experience: 4.5 years
+Summary: Builds agentic AI products with strong Python, FastAPI, LangGraph, RAG, embeddings, vector databases, and recruiter-facing UX.
+Skills: Python, FastAPI, AI agents, LangGraph, RAG, embeddings, vector databases, prompt engineering, evaluations, PostgreSQL, Docker
+Projects:
+- Built a resume-to-shortlist agent that parsed JDs, normalized skills, ranked candidates, and generated recruiter notes.
+- Shipped a LangGraph support agent with tool calling, trace logs, and human approval before actions.
+Achievements:
+- Reduced screening time by 35% in a pilot workflow.
+- Created evaluation tests for extraction quality, ranking quality, and hallucination risk.
+Preferences: open to remote or Bengaluru hybrid, likes ownership and agentic AI.
+Notice: 30 days
+Salary: 36 LPA
+
+---
+
+Name: Kavya Menon
+Current Title: Talent Intelligence Analyst
+Location: Pune
+Experience: 5 years
+Summary: Recruiting-tech specialist with sourcing, ATS workflows, scoring models, analytics, and candidate engagement experience.
+Skills: Python, recruiting, talent sourcing, ATS, scoring models, ranking, analytics, PostgreSQL, privacy
+Projects:
+- Built a talent market map that segmented candidates by skills, seniority, availability, and reply likelihood.
+- Designed outreach templates and measured candidate interest signals across hiring funnels.
+Achievements:
+- Improved recruiter reply rates by 18% using personalized hooks.
+- Built a transparent candidate scorecard used by hiring managers.
+Preferences: remote work, recruiting domain, candidate engagement.
+Notice: 20 days
+Salary: 28 LPA
+
+---
+
+Name: Dev Sharma
+Current Title: ML Engineer
+Location: Hyderabad
+Experience: 3.5 years
+Summary: ML engineer focused on semantic search, RAG, vector databases, ranking, and evaluation loops.
+Skills: Python, RAG, embeddings, semantic search, vector databases, ranking, PyTorch, transformers, FastAPI, AWS
+Projects:
+- Built hybrid retrieval for noisy technical profiles using vector search and cross-encoder reranking.
+- Created an evaluation dashboard for precision, recall, latency, and failure examples.
+Achievements:
+- Improved top-5 retrieval precision from 70% to 86%.
+Preferences: remote work, hard ranking problems, applied AI.
+Notice: 45 days
+Salary: 32 LPA
+"""
+
 
 app = FastAPI(
     title="TalentSignal Agent",
@@ -56,12 +108,19 @@ async def sample_jd() -> dict[str, str]:
     return {"job_description": SAMPLE_JD}
 
 
+@app.get("/api/sample-resumes")
+async def sample_resumes() -> dict[str, str]:
+    return {"candidate_resumes": SAMPLE_RESUMES}
+
+
 @app.post("/api/analyze")
 async def analyze(payload: AnalyzeRequest) -> JSONResponse:
     run = agent.run(
         job_description=payload.job_description,
         top_k=payload.top_k,
         simulate=payload.simulate_outreach,
+        candidate_resumes=payload.candidate_resumes,
+        include_sample_market=payload.include_sample_market,
     )
     return JSONResponse(content=jsonable_encoder(run))
 
