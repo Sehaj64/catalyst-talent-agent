@@ -8,25 +8,49 @@ from typing import List, Dict, Any
 
 # --- API Configuration Helper ---
 def configure_gemini(api_key: str):
-    genai.configure(api_key=api_key)
+    try:
+        genai.configure(api_key=api_key)
+    except Exception as e:
+        st.error(f"Failed to configure Gemini API: {e}")
 
 # --- File Parsers ---
 def read_docx(file: Any) -> str:
     try:
         doc = docx.Document(file)
-        return "\n".join([p.text for p in doc.paragraphs])
+        text = "\n".join([p.text for p in doc.paragraphs])
+        return text.strip()
     except Exception as e:
-        st.error(f"Error reading DOCX: {e}")
+        st.error(f"Error reading DOCX ({file.name}): {e}")
         return ""
 
 def read_pdf(file: Any) -> str:
     try:
         pdf_reader = pypdf.PdfReader(file)
-        return "\n".join([page.extract_text() for page in pdf_reader.pages if page.extract_text()])
-    except Exception:
+        text = "\n".join([page.extract_text() for page in pdf_reader.pages if page.extract_text()])
+        return text.strip()
+    except Exception as e:
+        st.error(f"Error reading PDF ({file.name}): {e}")
         return ""
 
-# --- Advanced AI Extraction (Replaces legacy spaCy) ---
+# --- Helper for JSON parsing from LLM ---
+def safe_json_loads(text: str, fallback: Any) -> Any:
+    """Attempt to parse JSON, cleaning common LLM markdown noise."""
+    try:
+        # Remove markdown code blocks if present
+        clean_text = re.sub(r'```json\s*|\s*```', '', text).strip()
+        return json.loads(clean_text)
+    except Exception as e:
+        st.warning(f"Failed to parse AI response as JSON. Using fallback. Error: {e}")
+        # Try finding anything that looks like a JSON object
+        try:
+            match = re.search(r'\{.*\}', clean_text, re.DOTALL)
+            if match:
+                return json.loads(match.group())
+        except:
+            pass
+        return fallback
+
+# --- Advanced AI Extraction ---
 def analyze_job_description(jd_text: str, api_key: str) -> Dict[str, Any]:
     """Uses LLM to deeply understand the Job Description requirements."""
     configure_gemini(api_key)
@@ -43,13 +67,17 @@ def analyze_job_description(jd_text: str, api_key: str) -> Dict[str, Any]:
     }}
     
     Job Description:
-    {jd_text[:3000]}
+    {jd_text[:4000]}
     """
+    fallback = {"job_title": "Unknown Position", "core_skills": [], "years_experience_required": "N/A", "key_responsibilities": []}
     try:
         response = model.generate_content(prompt)
-        return json.loads(response.text)
+        if not response or not response.text:
+            return fallback
+        return safe_json_loads(response.text, fallback)
     except Exception as e:
-        return {"job_title": "Unknown", "core_skills": [], "years_experience_required": "N/A", "key_responsibilities": []}
+        st.error(f"AI Job Analysis failed: {e}")
+        return fallback
 
 def calculate_advanced_match(jd_data: Dict[str, Any], resume_text: str, api_key: str) -> Dict[str, Any]:
     """Semantic matching engine returning score and reasoning."""
@@ -64,7 +92,7 @@ def calculate_advanced_match(jd_data: Dict[str, Any], resume_text: str, api_key:
     {json.dumps(jd_data)}
     
     Resume:
-    {resume_text[:4000]}
+    {resume_text[:5000]}
     
     Required Schema:
     {{
@@ -73,11 +101,15 @@ def calculate_advanced_match(jd_data: Dict[str, Any], resume_text: str, api_key:
         "extracted_candidate_skills": ["string"]
     }}
     """
+    fallback = {"match_score": 0, "explanation": "Could not complete analysis.", "extracted_candidate_skills": []}
     try:
         response = model.generate_content(prompt)
-        return json.loads(response.text)
-    except Exception:
-        return {"match_score": 0, "explanation": "Analysis failed.", "extracted_candidate_skills": []}
+        if not response or not response.text:
+            return fallback
+        return safe_json_loads(response.text, fallback)
+    except Exception as e:
+        st.error(f"AI Match Calculation failed: {e}")
+        return fallback
 
 # --- Dynamic Conversational Engagement ---
 def generate_initial_greeting(jd_data: Dict[str, Any], candidate_name: str, api_key: str) -> str:
@@ -89,9 +121,12 @@ def generate_initial_greeting(jd_data: Dict[str, Any], candidate_name: str, api_
     about the {jd_data.get('job_title', 'open')} role. Ask a qualifying question about one of these core skills: {jd_data.get('core_skills', [])[:3]}.
     """
     try:
-        return model.generate_content(prompt).text.strip()
-    except:
-        return f"Hi {candidate_name}, I'm the AI recruiter for the open role. Are you still interested?"
+        response = model.generate_content(prompt)
+        if response and response.text:
+            return response.text.strip()
+        return f"Hi {candidate_name}, I'm the AI recruiter for the {jd_data.get('job_title', 'open')} role. Are you interested in discussing your experience?"
+    except Exception as e:
+        return f"Hi {candidate_name}, I'm the AI recruiter. Are you still interested in the {jd_data.get('job_title', 'open')} role?"
 
 def get_agent_reply(chat_history: List[Dict[str, str]], jd_data: Dict[str, Any], api_key: str) -> str:
     """Generates the next reply from the AI Recruiter."""
@@ -113,9 +148,12 @@ def get_agent_reply(chat_history: List[Dict[str, str]], jd_data: Dict[str, Any],
     AI Recruiter's Next Reply:
     """
     try:
-        return model.generate_content(prompt).text.strip()
-    except:
-        return "Thank you for sharing."
+        response = model.generate_content(prompt)
+        if response and response.text:
+            return response.text.strip()
+        return "Thank you for sharing that. Could you tell me more about your experience with the core skills mentioned?"
+    except Exception:
+        return "Interesting. Tell me more."
 
 def evaluate_final_interest(chat_history: List[Dict[str, str]], api_key: str) -> int:
     """Calculates final interest and alignment score (0-100) from the conversation."""
@@ -133,7 +171,9 @@ def evaluate_final_interest(chat_history: List[Dict[str, str]], api_key: str) ->
     """
     try:
         response = model.generate_content(prompt)
-        score_match = re.search(r'\d+', response.text)
-        return int(score_match.group()) if score_match else 50
-    except:
+        if response and response.text:
+            score_match = re.search(r'\d+', response.text)
+            return int(score_match.group()) if score_match else 50
+        return 50
+    except Exception:
         return 50

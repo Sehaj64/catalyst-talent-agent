@@ -1,46 +1,62 @@
-# Catalyst AI: Talent Scouting & Engagement Agent
+# 🤖 Catalyst AI: Advanced Talent Agent
 
-## Overview
-Catalyst AI is an intelligent recruitment agent designed to automate the most time-consuming parts of the hiring funnel: **discovery, screening, and engagement.**
+Catalyst AI is an autonomous recruiting agent that performs semantic matching between Job Descriptions and Resumes, followed by automated conversational engagement to qualify candidates.
 
-Unlike traditional ATS systems that only parse keywords, Catalyst AI acts as an autonomous agent that not only finds candidates but actively engages them to assess genuine interest and cultural alignment.
+## 🚀 Features
+- **Semantic Matching**: Beyond keyword matching, it understands context using Gemini 1.5.
+- **Autonomous Engagement**: Generates dynamic interview questions based on JD requirements.
+- **ROI Ranking**: Combines technical fit and conversational interest into a final score.
 
-## Core Features
-1. **AI-Powered Scouting:** Uses LLM-based analysis to go beyond simple keyword matching. It provides **Explainable AI** summaries for every candidate, telling the recruiter *why* a candidate is a fit.
-2. **Autonomous Engagement (Simulated):** Generates candidate-specific screening questions based on the Job Description and simulates a conversational outreach to assess interest.
-3. **Dual-Dimension Scoring:** Ranks candidates on a weighted score:
-   - **Match Score (70%):** Technical proficiency and experience overlap.
-   - **Interest Score (30%):** Enthusiasm, availability, and alignment discovered during the engagement phase.
+## 🛠️ Setup Instructions
 
-## Technical Architecture
-- **Frontend:** Streamlit for a fast, responsive recruiter dashboard.
-- **LLM Engine:** Google Gemini (1.5 Flash) for high-speed, cost-effective reasoning and NLP.
-- **NLP Pipeline:** spaCy for structured entity extraction and initial skill filtering.
-- **State Management:** Streamlit session state handles multi-step candidate engagement tracking.
-
-## Measurable Business Impact (ROI)
-- **Workflow Throughput:** Reduces initial screening time by an estimated **60%** by automating the first touchpoint.
-- **Accuracy Lift:** "Explainable Matching" reduces the false-positive rate of keyword-based filters.
-- **Cost Reduction:** Eliminates the need for expensive third-party screening tools by integrating intelligence directly into the discovery phase.
-
-## Installation & Setup
-1. Clone the repository.
-2. Install dependencies:
+1. **Clone the repository**
+2. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
-3. Set your Google AI API Key:
-   ```bash
-   export GOOGLE_API_KEY='your_api_key_here'
-   ```
-4. Run the application:
+3. **Set up your API Key**:
+   - Create a `.streamlit/secrets.toml` file in the root directory.
+   - Add your Gemini API key:
+     ```toml
+     GEMINI_API_KEY = "your_google_api_key_here"
+     ```
+   - Alternatively, set an environment variable: `export GOOGLE_API_KEY="your_key_here"`
+
+4. **Run the app**:
    ```bash
    streamlit run app.py
    ```
 
-## Demo Use Case
-1. Upload a **Senior Data Scientist** JD.
-2. Upload 5 sample resumes.
-3. Run the "Scouting Agent" to see the explained matches.
-4. Select a top candidate and click "Begin Outreach."
-5. Chat with the candidate (simulated) and click "Finalize Engagement" to see the final ROI-ranked shortlist.
+## 🔍 Troubleshooting
+
+If the application is "not working", check the following:
+
+### 1. API Key Issues
+- **Error**: "API Key Missing!"
+- **Fix**: Ensure `GEMINI_API_KEY` is in `.streamlit/secrets.toml` or `GOOGLE_API_KEY` is in your environment.
+
+### 2. Import Errors
+- **Error**: `ModuleNotFoundError: No module named 'src'`
+- **Fix**: We've added `sys.path.append` to `app.py` to fix this. Ensure you run the app from the root directory of the project.
+
+### 3. File Parsing Failures
+- **Error**: "Could not extract text from Job Description"
+- **Fix**: Ensure your PDFs/DOCX files are not password-protected or corrupted. The app now includes better error logging for these cases.
+
+### 4. AI Analysis Failures
+- **Error**: "AI Job Analysis failed" or "AI Match Calculation failed"
+- **Fix**: 
+  - Check your internet connection.
+  - Verify your Gemini API key has access to the `gemini-1.5-flash` model.
+  - The app now uses robust JSON parsing with fallbacks to handle inconsistent LLM responses.
+
+### 5. Dependency Issues
+- Ensure all packages in `requirements.txt` are installed. If you see errors related to `docx` or `pypdf`, try reinstalling them:
+  ```bash
+  pip install --force-reinstall python-docx pypdf
+  ```
+
+## 🏗️ Project Structure
+- `app.py`: Main Streamlit dashboard and UI logic.
+- `src/utils.py`: Core logic for file parsing, Gemini API interaction, and matching algorithms.
+- `requirements.txt`: List of required Python packages.
