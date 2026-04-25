@@ -3,6 +3,13 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from .data import SAMPLE_CANDIDATES
+from .decision_intelligence import (
+    build_evidence_paths,
+    build_recruiter_brief,
+    confidence_score,
+    interview_questions,
+    risk_signals,
+)
 from .discovery import CandidateDiscovery
 from .jd_parser import parse_job_description
 from .outreach import simulate_outreach
@@ -53,6 +60,25 @@ class TalentScoutingAgent:
                     "next_steps": ["Run outreach simulation or contact candidate manually."],
                 }
 
+            evidence_paths = build_evidence_paths(
+                candidate=candidate,
+                job_spec=job_spec,
+                matched_skills=match["matched_skills"],  # type: ignore[arg-type]
+                related_skills=match["related_skills"],  # type: ignore[arg-type]
+            )
+            confidence = confidence_score(
+                candidate=candidate,
+                match_score=float(match["score"]),
+                interest_score=float(outreach["score"]),
+                missing_skills=match["missing_skills"],  # type: ignore[arg-type]
+                evidence_paths=evidence_paths,
+            )
+            candidate_risks = risk_signals(
+                candidate=candidate,
+                job_spec=job_spec,
+                missing_skills=match["missing_skills"],  # type: ignore[arg-type]
+                interest_score=float(outreach["score"]),
+            )
             combined = round((float(match["score"]) * 0.65) + (float(outreach["score"]) * 0.35), 1)
             assessments.append(
                 CandidateAssessment(
@@ -60,6 +86,7 @@ class TalentScoutingAgent:
                     candidate=candidate,
                     match_score=float(match["score"]),
                     interest_score=float(outreach["score"]),
+                    confidence_score=confidence,
                     combined_score=combined,
                     decision=decision_label(combined, float(match["score"]), float(outreach["score"])),
                     matched_skills=match["matched_skills"],  # type: ignore[arg-type]
@@ -67,8 +94,15 @@ class TalentScoutingAgent:
                     missing_skills=match["missing_skills"],  # type: ignore[arg-type]
                     score_breakdown=match["breakdown"],  # type: ignore[arg-type]
                     match_explanation=str(match["explanation"]),
+                    evidence_paths=evidence_paths,
                     outreach_hook=str(match["outreach_hook"]),
                     transcript=outreach["transcript"],  # type: ignore[arg-type]
+                    interview_questions=interview_questions(
+                        candidate=candidate,
+                        job_spec=job_spec,
+                        missing_skills=match["missing_skills"],  # type: ignore[arg-type]
+                    ),
+                    risk_signals=candidate_risks,
                     reservations=outreach["reservations"],  # type: ignore[arg-type]
                     next_steps=outreach["next_steps"],  # type: ignore[arg-type]
                     counterfactual=str(match["counterfactual"]),
@@ -80,6 +114,7 @@ class TalentScoutingAgent:
             assessment.rank = index
 
         audit_log.append("Computed match, interest, and combined ranking scores with explainable breakdowns.")
+        audit_log.append("Generated evidence paths, confidence scores, risk mitigations, and interview questions.")
         audit_log.append(f"Returned top {len(ranked)} candidates with next actions for the recruiter.")
 
         return AgentRun(
@@ -87,6 +122,7 @@ class TalentScoutingAgent:
             job_spec=job_spec,
             search_strategy=search_strategy,
             ranked_shortlist=ranked,
+            recruiter_brief=build_recruiter_brief(ranked, job_spec),
             summary=self._summary(ranked, job_spec),
             audit_log=audit_log,
         )
@@ -104,6 +140,7 @@ class TalentScoutingAgent:
 
         avg_match = round(sum(item.match_score for item in ranked) / len(ranked), 1)
         avg_interest = round(sum(item.interest_score for item in ranked) / len(ranked), 1)
+        avg_confidence = round(sum(item.confidence_score for item in ranked) / len(ranked), 1)
         risk_flags = []
         if any(item.missing_skills for item in ranked[:3]):
             risk_flags.append("Top candidates still have at least one skill gap to validate.")
@@ -116,6 +153,7 @@ class TalentScoutingAgent:
             "total_shortlisted": len(ranked),
             "average_match_score": avg_match,
             "average_interest_score": avg_interest,
+            "average_confidence_score": avg_confidence,
             "top_candidate": ranked[0].candidate.name,
             "recommended_action": f"Start with {ranked[0].candidate.name}; they have the strongest combined evidence and interest signal.",
             "risk_flags": risk_flags,

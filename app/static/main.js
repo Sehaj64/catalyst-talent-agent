@@ -6,6 +6,7 @@ const topK = document.querySelector("#topK");
 const simulateOutreach = document.querySelector("#simulateOutreach");
 const statusText = document.querySelector("#statusText");
 const summaryGrid = document.querySelector("#summaryGrid");
+const recruiterBrief = document.querySelector("#recruiterBrief");
 const parsedSpec = document.querySelector("#parsedSpec");
 const searchStrategy = document.querySelector("#searchStrategy");
 const candidateResults = document.querySelector("#candidateResults");
@@ -83,6 +84,7 @@ async function analyze() {
 
 function renderRun(run) {
   renderSummary(run);
+  renderRecruiterBrief(run.recruiter_brief);
   renderParsedSpec(run.job_spec);
   renderSearchStrategy(run.search_strategy, run.audit_log);
   renderCandidates(run.ranked_shortlist);
@@ -94,8 +96,34 @@ function renderSummary(run) {
     metric("Shortlisted", summary.total_shortlisted),
     metric("Avg Match", summary.average_match_score),
     metric("Avg Interest", summary.average_interest_score),
-    metric("Top Candidate", summary.top_candidate),
+    metric("Avg Confidence", summary.average_confidence_score),
   ].join("");
+}
+
+function renderRecruiterBrief(brief) {
+  recruiterBrief.className = "brief-panel ready";
+  recruiterBrief.innerHTML = `
+    <h3>Recruiter Brief</h3>
+    <p>${escapeHtml(brief.hiring_thesis)}</p>
+    <div class="brief-grid">
+      <div>
+        <h4>Strategy</h4>
+        <p>${escapeHtml(brief.shortlist_strategy)}</p>
+      </div>
+      <div>
+        <h4>Sequence</h4>
+        <ul>${brief.recommended_sequence.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </div>
+      <div>
+        <h4>Trade-offs</h4>
+        <ul>${brief.top_tradeoffs.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </div>
+      <div>
+        <h4>Compliance Audit</h4>
+        <ul>${brief.compliance_audit.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </div>
+    </div>
+  `;
 }
 
 function metric(label, value) {
@@ -157,6 +185,7 @@ function renderCandidate(item) {
           ${scoreBox("Match", item.match_score, "match")}
           ${scoreBox("Interest", item.interest_score, "interest")}
           ${scoreBox("Combined", item.combined_score, "combined")}
+          ${scoreBox("Confidence", item.confidence_score, "confidence")}
         </div>
         <p class="explanation">${escapeHtml(item.match_explanation)}</p>
         <div class="chip-row">${chips(item.matched_skills)}${chips(item.missing_skills, "warn")}</div>
@@ -183,6 +212,22 @@ function renderCandidate(item) {
               <h4>Next Steps</h4>
               <ul class="plain-list">${item.next_steps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>
             </div>
+            <div class="detail-block full">
+              <h4>Evidence Paths</h4>
+              <ul class="plain-list">
+                ${item.evidence_paths
+                  .map((path) => `<li><strong>${escapeHtml(path.claim)}</strong> (${escapeHtml(String(Math.round(path.confidence * 100)))}%): ${escapeHtml(path.evidence)}</li>`)
+                  .join("")}
+              </ul>
+            </div>
+            <div class="detail-block">
+              <h4>Risk Signals</h4>
+              ${renderRisks(item.risk_signals)}
+            </div>
+            <div class="detail-block">
+              <h4>Interview Questions</h4>
+              <ul class="plain-list">${item.interview_questions.map((question) => `<li>${escapeHtml(question)}</li>`).join("")}</ul>
+            </div>
             <div class="detail-block">
               <h4>Candidate Evidence</h4>
               <ul class="plain-list">${c.evidence.slice(0, 3).map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>
@@ -198,6 +243,20 @@ function renderCandidate(item) {
       </div>
     </article>
   `;
+}
+
+function renderRisks(risks) {
+  if (!risks || risks.length === 0) {
+    return "<p>No major first-pass risk detected.</p>";
+  }
+  return risks
+    .map(
+      (risk) => `
+        <p><span class="risk-pill ${escapeHtml(risk.severity)}">${escapeHtml(risk.severity)}</span><strong>${escapeHtml(risk.label)}</strong></p>
+        <p>${escapeHtml(risk.rationale)} ${escapeHtml(risk.mitigation)}</p>
+      `,
+    )
+    .join("");
 }
 
 function scoreBox(label, value, className) {

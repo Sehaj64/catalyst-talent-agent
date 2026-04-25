@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-25T17:44:41.291647Z",
+  "generated_at": "2026-04-25T17:51:01.925301Z",
   "job_spec": {
     "original_text": "Role: Senior AI Engineer - Agentic Talent Scouting\n\nWe are building an AI-powered talent scouting and engagement agent for recruiters. The agent should parse job descriptions, discover matching candidates, score them with explainable match logic, simulate conversational outreach, and return a ranked shortlist that a recruiter can act on immediately.\n\nResponsibilities:\n- Build production-quality Python services and clean recruiter-facing workflows.\n- Design AI agents with tool calling, RAG, candidate matching, ranking, and evaluation loops.\n- Create transparent scoring for Match Score and Interest Score.\n- Work with candidate data responsibly, including privacy and human-in-the-loop review.\n\nRequirements:\n- 3+ years of experience building AI or ML products.\n- Strong Python and FastAPI.\n- Experience with LLMs, RAG, embeddings, vector databases, and prompt engineering.\n- Bonus: recruiting, talent sourcing, ATS integrations, LangGraph, observability, and privacy.\n\nLocation: Remote or Bengaluru hybrid.",
     "title": "AI Engineer",
@@ -166,6 +166,7 @@
       },
       "match_score": 88.1,
       "interest_score": 87.4,
+      "confidence_score": 94.3,
       "combined_score": 87.9,
       "decision": "Priority shortlist",
       "matched_skills": [
@@ -217,6 +218,44 @@
         "differentiation": 9.2
       },
       "match_explanation": "Aanya Rao scores 88.1/100 because of direct coverage in ai agents, embeddings, evaluations, fastapi, langgraph; adjacent depth for human-in-the-loop, ranking, prompt engineering; domain overlap in hrtech. Main gaps: scoring models, privacy.",
+      "evidence_paths": [
+        {
+          "claim": "Direct evidence for ai agents",
+          "evidence": "Public repo shows FastAPI + LangGraph agent orchestration with typed state transitions.",
+          "source": "Simulated GitHub, portfolio, and LinkedIn-style profile",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for embeddings",
+          "evidence": "Blog post explains candidate matching with embeddings, hard constraints, and audit trails.",
+          "source": "Simulated GitHub, portfolio, and LinkedIn-style profile",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for evaluations",
+          "evidence": "Public repo shows FastAPI + LangGraph agent orchestration with typed state transitions.",
+          "source": "Simulated GitHub, portfolio, and LinkedIn-style profile",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for fastapi",
+          "evidence": "Public repo shows FastAPI + LangGraph agent orchestration with typed state transitions.",
+          "source": "Simulated GitHub, portfolio, and LinkedIn-style profile",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Adjacent evidence for missing/implicit human-in-the-loop",
+          "evidence": "Public repo shows FastAPI + LangGraph agent orchestration with typed state transitions. Related skills observed: ai agents, langchain, langgraph.",
+          "source": "Simulated GitHub, portfolio, and LinkedIn-style profile",
+          "confidence": 0.68
+        },
+        {
+          "claim": "Adjacent evidence for missing/implicit ranking",
+          "evidence": "Blog post explains candidate matching with embeddings, hard constraints, and audit trails. Related skills observed: embeddings, rag, vector databases.",
+          "source": "Simulated GitHub, portfolio, and LinkedIn-style profile",
+          "confidence": 0.68
+        }
+      ],
       "outreach_hook": "Lead with their ai agents, embeddings, evaluations work: Public repo shows FastAPI + LangGraph agent orchestration with typed state transitions.",
       "transcript": [
         {
@@ -242,6 +281,22 @@
           "intent": "constraints and motivation",
           "message": "My notice period is 30 days and compensation expectation is around 42 LPA. The strongest pull is motivated by agentic ai. Main concern: will ask about data access and production roadmap.",
           "sentiment": "positive"
+        }
+      ],
+      "interview_questions": [
+        "Walk me through a shipped project where you used python to solve a real user problem.",
+        "What would your first version of this talent-scouting agent do in week one, and what would you intentionally leave out?",
+        "How would you evaluate whether the agent's shortlist is actually useful to recruiters?",
+        "Show the trade-offs you would make around human-in-the-loop for speed versus reliability.",
+        "Where have you built something closest to scoring models, even if the stack name was different?",
+        "How would you prevent the agent from overusing sensitive candidate information?"
+      ],
+      "risk_signals": [
+        {
+          "label": "Skill validation needed",
+          "severity": "medium",
+          "rationale": "Missing direct evidence for scoring models, privacy.",
+          "mitigation": "Ask for a shipped example involving scoring models before final shortlist."
         }
       ],
       "reservations": [
@@ -326,6 +381,7 @@
       },
       "match_score": 72.7,
       "interest_score": 82.8,
+      "confidence_score": 87.4,
       "combined_score": 76.2,
       "decision": "Shortlist",
       "matched_skills": [
@@ -374,6 +430,44 @@
         "differentiation": 3.4
       },
       "match_explanation": "Neel Vohra scores 72.7/100 because of direct coverage in ai agents, embeddings, evaluations, fastapi, langgraph; adjacent depth for human-in-the-loop, tool calling, ranking. Main gaps: scoring models, privacy.",
+      "evidence_paths": [
+        {
+          "claim": "Direct evidence for ai agents",
+          "evidence": "GitHub has recent commits to a LangGraph agent with scoring traces.",
+          "source": "Simulated GitHub and hackathon profile",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for embeddings",
+          "evidence": "GitHub has recent commits to a LangGraph agent with scoring traces.",
+          "source": "Simulated GitHub and hackathon profile",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for evaluations",
+          "evidence": "GitHub has recent commits to a LangGraph agent with scoring traces.",
+          "source": "Simulated GitHub and hackathon profile",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for fastapi",
+          "evidence": "GitHub has recent commits to a LangGraph agent with scoring traces.",
+          "source": "Simulated GitHub and hackathon profile",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Adjacent evidence for missing/implicit human-in-the-loop",
+          "evidence": "GitHub has recent commits to a LangGraph agent with scoring traces. Related skills observed: ai agents, langgraph, llamaindex.",
+          "source": "Simulated GitHub and hackathon profile",
+          "confidence": 0.68
+        },
+        {
+          "claim": "Adjacent evidence for missing/implicit tool calling",
+          "evidence": "GitHub has recent commits to a LangGraph agent with scoring traces. Related skills observed: ai agents, langgraph, llamaindex.",
+          "source": "Simulated GitHub and hackathon profile",
+          "confidence": 0.68
+        }
+      ],
       "outreach_hook": "Lead with their ai agents, embeddings, evaluations work: GitHub has recent commits to a LangGraph agent with scoring traces.",
       "transcript": [
         {
@@ -399,6 +493,28 @@
           "intent": "constraints and motivation",
           "message": "My notice period is 15 days and compensation expectation is around 29 LPA. The strongest pull is motivated by agentic ai. Main concern: will need mentoring on mature engineering practices.",
           "sentiment": "positive"
+        }
+      ],
+      "interview_questions": [
+        "Walk me through a shipped project where you used python to solve a real user problem.",
+        "What would your first version of this talent-scouting agent do in week one, and what would you intentionally leave out?",
+        "How would you evaluate whether the agent's shortlist is actually useful to recruiters?",
+        "Show the trade-offs you would make around human-in-the-loop for speed versus reliability.",
+        "Where have you built something closest to scoring models, even if the stack name was different?",
+        "How would you prevent the agent from overusing sensitive candidate information?"
+      ],
+      "risk_signals": [
+        {
+          "label": "Skill validation needed",
+          "severity": "medium",
+          "rationale": "Missing direct evidence for scoring models, privacy.",
+          "mitigation": "Ask for a shipped example involving scoring models before final shortlist."
+        },
+        {
+          "label": "Domain transfer risk",
+          "severity": "low",
+          "rationale": "No direct domain overlap with hrtech, security.",
+          "mitigation": "Use the first screen to test how quickly they map prior systems to this domain."
         }
       ],
       "reservations": [
@@ -482,6 +598,7 @@
       },
       "match_score": 69.7,
       "interest_score": 81.2,
+      "confidence_score": 85.5,
       "combined_score": 73.7,
       "decision": "Warm backup",
       "matched_skills": [
@@ -532,6 +649,44 @@
         "differentiation": 3.4
       },
       "match_explanation": "Vivek Menon scores 69.7/100 because of direct coverage in fastapi, llms, observability, python, rag; adjacent depth for human-in-the-loop, ai agents, ranking. Main gaps: evaluations, scoring models.",
+      "evidence_paths": [
+        {
+          "claim": "Direct evidence for fastapi",
+          "evidence": "GitHub has clean FastAPI services with typed Pydantic contracts.",
+          "source": "Simulated GitHub, product portfolio, and demo videos",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for llms",
+          "evidence": "GitHub has clean FastAPI services with typed Pydantic contracts.",
+          "source": "Simulated GitHub, product portfolio, and demo videos",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for observability",
+          "evidence": "GitHub has clean FastAPI services with typed Pydantic contracts.",
+          "source": "Simulated GitHub, product portfolio, and demo videos",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for python",
+          "evidence": "GitHub has clean FastAPI services with typed Pydantic contracts.",
+          "source": "Simulated GitHub, product portfolio, and demo videos",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Adjacent evidence for missing/implicit human-in-the-loop",
+          "evidence": "GitHub has clean FastAPI services with typed Pydantic contracts. Related skills observed: llms, observability, tool calling.",
+          "source": "Simulated GitHub, product portfolio, and demo videos",
+          "confidence": 0.68
+        },
+        {
+          "claim": "Adjacent evidence for missing/implicit ai agents",
+          "evidence": "GitHub has clean FastAPI services with typed Pydantic contracts. Related skills observed: llms, tool calling.",
+          "source": "Simulated GitHub, product portfolio, and demo videos",
+          "confidence": 0.68
+        }
+      ],
       "outreach_hook": "Lead with their fastapi, llms, observability work: GitHub has clean FastAPI services with typed Pydantic contracts.",
       "transcript": [
         {
@@ -557,6 +712,28 @@
           "intent": "constraints and motivation",
           "message": "My notice period is 30 days and compensation expectation is around 45 LPA. The strongest pull is motivated by agentic ai. Main concern: will probe whether role is frontend-heavy or agent-heavy.",
           "sentiment": "positive"
+        }
+      ],
+      "interview_questions": [
+        "Walk me through a shipped project where you used python to solve a real user problem.",
+        "What would your first version of this talent-scouting agent do in week one, and what would you intentionally leave out?",
+        "How would you evaluate whether the agent's shortlist is actually useful to recruiters?",
+        "Show the trade-offs you would make around human-in-the-loop for speed versus reliability.",
+        "Where have you built something closest to evaluations, even if the stack name was different?",
+        "How would you prevent the agent from overusing sensitive candidate information?"
+      ],
+      "risk_signals": [
+        {
+          "label": "Skill validation needed",
+          "severity": "medium",
+          "rationale": "Missing direct evidence for evaluations, scoring models.",
+          "mitigation": "Ask for a shipped example involving evaluations before final shortlist."
+        },
+        {
+          "label": "Domain transfer risk",
+          "severity": "low",
+          "rationale": "No direct domain overlap with hrtech, security.",
+          "mitigation": "Use the first screen to test how quickly they map prior systems to this domain."
         }
       ],
       "reservations": [
@@ -636,6 +813,7 @@
       },
       "match_score": 69.7,
       "interest_score": 72.2,
+      "confidence_score": 82.8,
       "combined_score": 70.6,
       "decision": "Warm backup",
       "matched_skills": [
@@ -680,6 +858,44 @@
         "differentiation": 4.6
       },
       "match_explanation": "Pooja Bhat scores 69.7/100 because of direct coverage in ai agents, evaluations, fastapi, llms, observability; adjacent depth for human-in-the-loop, tool calling, prompt engineering; domain overlap in security. Main gaps: ranking, scoring models, rag.",
+      "evidence_paths": [
+        {
+          "claim": "Direct evidence for ai agents",
+          "evidence": "Blog post details prompt injection mitigation and PII minimization for agents.",
+          "source": "Simulated GitHub and security blog",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for evaluations",
+          "evidence": "Blog post details prompt injection mitigation and PII minimization for agents.",
+          "source": "Simulated GitHub and security blog",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for fastapi",
+          "evidence": "Blog post details prompt injection mitigation and PII minimization for agents.",
+          "source": "Simulated GitHub and security blog",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for llms",
+          "evidence": "Blog post details prompt injection mitigation and PII minimization for agents.",
+          "source": "Simulated GitHub and security blog",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Adjacent evidence for missing/implicit human-in-the-loop",
+          "evidence": "Blog post details prompt injection mitigation and PII minimization for agents. Related skills observed: ai agents, llms, observability.",
+          "source": "Simulated GitHub and security blog",
+          "confidence": 0.68
+        },
+        {
+          "claim": "Adjacent evidence for missing/implicit tool calling",
+          "evidence": "Blog post details prompt injection mitigation and PII minimization for agents. Related skills observed: ai agents, llms.",
+          "source": "Simulated GitHub and security blog",
+          "confidence": 0.68
+        }
+      ],
       "outreach_hook": "Lead with their ai agents, evaluations, fastapi work: Blog post details prompt injection mitigation and PII minimization for agents.",
       "transcript": [
         {
@@ -705,6 +921,22 @@
           "intent": "constraints and motivation",
           "message": "My notice period is 30 days and compensation expectation is around 44 LPA. The strongest pull is motivated by safe agents. Main concern: may be less drawn to recruiter tooling unless privacy is central.",
           "sentiment": "cautious"
+        }
+      ],
+      "interview_questions": [
+        "Walk me through a shipped project where you used python to solve a real user problem.",
+        "What would your first version of this talent-scouting agent do in week one, and what would you intentionally leave out?",
+        "How would you evaluate whether the agent's shortlist is actually useful to recruiters?",
+        "Show the trade-offs you would make around human-in-the-loop for speed versus reliability.",
+        "Where have you built something closest to ranking, even if the stack name was different?",
+        "How would you prevent the agent from overusing sensitive candidate information?"
+      ],
+      "risk_signals": [
+        {
+          "label": "Skill validation needed",
+          "severity": "high",
+          "rationale": "Missing direct evidence for ranking, scoring models, rag.",
+          "mitigation": "Ask for a shipped example involving ranking before final shortlist."
         }
       ],
       "reservations": [
@@ -789,6 +1021,7 @@
       },
       "match_score": 72.2,
       "interest_score": 61.8,
+      "confidence_score": 82.4,
       "combined_score": 68.6,
       "decision": "Warm backup",
       "matched_skills": [
@@ -834,6 +1067,44 @@
         "differentiation": 5.8
       },
       "match_explanation": "Sara Khan scores 72.2/100 because of direct coverage in ats, embeddings, privacy, python, ranking; adjacent depth for human-in-the-loop, fastapi, rag; domain overlap in hrtech. Main gaps: tool calling, evaluations, ai agents.",
+      "evidence_paths": [
+        {
+          "claim": "Direct evidence for ats",
+          "evidence": "Portfolio case study explains skill normalization and ATS enrichment.",
+          "source": "Simulated portfolio and recruiter-ops profile",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for embeddings",
+          "evidence": "Portfolio case study explains skill normalization and ATS enrichment.",
+          "source": "Simulated portfolio and recruiter-ops profile",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for privacy",
+          "evidence": "Portfolio case study explains skill normalization and ATS enrichment.",
+          "source": "Simulated portfolio and recruiter-ops profile",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Direct evidence for python",
+          "evidence": "Portfolio case study explains skill normalization and ATS enrichment.",
+          "source": "Simulated portfolio and recruiter-ops profile",
+          "confidence": 0.88
+        },
+        {
+          "claim": "Adjacent evidence for missing/implicit human-in-the-loop",
+          "evidence": "Portfolio case study explains skill normalization and ATS enrichment. Related skills observed: privacy.",
+          "source": "Simulated portfolio and recruiter-ops profile",
+          "confidence": 0.68
+        },
+        {
+          "claim": "Adjacent evidence for missing/implicit fastapi",
+          "evidence": "Portfolio case study explains skill normalization and ATS enrichment. Related skills observed: python.",
+          "source": "Simulated portfolio and recruiter-ops profile",
+          "confidence": 0.68
+        }
+      ],
       "outreach_hook": "Lead with their ats, embeddings, privacy work: Portfolio case study explains skill normalization and ATS enrichment.",
       "transcript": [
         {
@@ -861,6 +1132,28 @@
           "sentiment": "cautious"
         }
       ],
+      "interview_questions": [
+        "Walk me through a shipped project where you used python to solve a real user problem.",
+        "What would your first version of this talent-scouting agent do in week one, and what would you intentionally leave out?",
+        "How would you evaluate whether the agent's shortlist is actually useful to recruiters?",
+        "Show the trade-offs you would make around human-in-the-loop for speed versus reliability.",
+        "Where have you built something closest to tool calling, even if the stack name was different?",
+        "How would you prevent the agent from overusing sensitive candidate information?"
+      ],
+      "risk_signals": [
+        {
+          "label": "Skill validation needed",
+          "severity": "high",
+          "rationale": "Missing direct evidence for tool calling, evaluations, ai agents.",
+          "mitigation": "Ask for a shipped example involving tool calling before final shortlist."
+        },
+        {
+          "label": "Engagement risk",
+          "severity": "medium",
+          "rationale": "Simulated outreach shows cautious or weak motivation.",
+          "mitigation": "Send a sharper role brief tied to the candidate's strongest motivation."
+        }
+      ],
       "reservations": [
         "wants clarity on engineering depth expected"
       ],
@@ -871,10 +1164,38 @@
       "counterfactual": "Would move up materially if they can show hands-on evidence for tool calling."
     }
   ],
+  "recruiter_brief": {
+    "hiring_thesis": "For AI Engineer, prioritize candidates with shipped agent/RAG evidence, recruiting-domain pull, and enough availability to enter process quickly.",
+    "shortlist_strategy": "Interview Aanya Rao first, compare against Neel Vohra, and use risk mitigations to avoid wasting panel time.",
+    "top_tradeoffs": [
+      "Aanya Rao: Skill validation needed.",
+      "Neel Vohra: Skill validation needed.",
+      "Vivek Menon: Skill validation needed."
+    ],
+    "recommended_sequence": [
+      "Start with Aanya Rao because combined score and confidence are strongest.",
+      "Use candidate-specific interview questions instead of a generic screen.",
+      "Validate the highest-severity risk before scheduling deep technical panels.",
+      "Keep the next two candidates warm as backups with tailored outreach hooks."
+    ],
+    "compliance_audit": [
+      "Scores use skills, evidence, domain context, logistics, and stated preferences.",
+      "Protected attributes such as gender, age, religion, caste, and ethnicity are not model inputs.",
+      "Location is used only as a logistics constraint and should be reviewed by a human recruiter.",
+      "Outreach is simulated in this prototype; production use should require consent-aware messaging."
+    ],
+    "demo_talking_points": [
+      "This is an auditable agent workflow, not a single black-box prompt.",
+      "The system separates role match from candidate interest, then combines them transparently.",
+      "Every top candidate includes evidence paths, risk mitigations, transcript, and next-best action.",
+      "The discovery layer is swappable for GitHub, ATS, CRM, or a consented talent graph."
+    ]
+  },
   "summary": {
     "total_shortlisted": 5,
     "average_match_score": 74.5,
     "average_interest_score": 77.1,
+    "average_confidence_score": 86.5,
     "top_candidate": "Aanya Rao",
     "recommended_action": "Start with Aanya Rao; they have the strongest combined evidence and interest signal.",
     "risk_flags": [
@@ -886,6 +1207,7 @@
     "Parsed JD into title=AI Engineer, seniority=senior, skills=10 must-have/9 nice-to-have.",
     "Discovered 12 candidate profiles from simulated public and ATS sources.",
     "Computed match, interest, and combined ranking scores with explainable breakdowns.",
+    "Generated evidence paths, confidence scores, risk mitigations, and interview questions.",
     "Returned top 5 candidates with next actions for the recruiter."
   ]
 }

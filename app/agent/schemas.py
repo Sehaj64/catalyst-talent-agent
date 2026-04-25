@@ -61,6 +61,20 @@ class OutreachTurn(BaseModel):
     sentiment: Literal["positive", "neutral", "cautious", "negative"] = "neutral"
 
 
+class EvidencePath(BaseModel):
+    claim: str
+    evidence: str
+    source: str
+    confidence: float = Field(ge=0, le=1)
+
+
+class RiskSignal(BaseModel):
+    label: str
+    severity: Literal["low", "medium", "high"]
+    rationale: str
+    mitigation: str
+
+
 class ScoreBreakdown(BaseModel):
     skill_alignment: float
     seniority_fit: float
@@ -75,6 +89,7 @@ class CandidateAssessment(BaseModel):
     candidate: CandidateProfile
     match_score: float
     interest_score: float
+    confidence_score: float
     combined_score: float
     decision: str
     matched_skills: list[str]
@@ -82,11 +97,23 @@ class CandidateAssessment(BaseModel):
     missing_skills: list[str]
     score_breakdown: ScoreBreakdown
     match_explanation: str
+    evidence_paths: list[EvidencePath]
     outreach_hook: str
     transcript: list[OutreachTurn]
+    interview_questions: list[str]
+    risk_signals: list[RiskSignal]
     reservations: list[str]
     next_steps: list[str]
     counterfactual: str
+
+
+class RecruiterBrief(BaseModel):
+    hiring_thesis: str
+    shortlist_strategy: str
+    top_tradeoffs: list[str]
+    recommended_sequence: list[str]
+    compliance_audit: list[str]
+    demo_talking_points: list[str]
 
 
 class AgentRun(BaseModel):
@@ -94,5 +121,6 @@ class AgentRun(BaseModel):
     job_spec: JobSpec
     search_strategy: dict[str, list[str]]
     ranked_shortlist: list[CandidateAssessment]
+    recruiter_brief: RecruiterBrief
     summary: dict[str, str | int | float | list[str]]
     audit_log: list[str]

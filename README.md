@@ -2,7 +2,7 @@
 
 AI-powered talent scouting and engagement agent for the Deccan AI Catalyst challenge.
 
-The app takes a job description, parses hiring requirements, discovers matching candidates from a simulated talent market, runs explainable match scoring, simulates conversational outreach, and returns a ranked shortlist with `Match Score`, `Interest Score`, decision labels, transcript snippets, and recruiter next steps.
+The app takes a job description, parses hiring requirements, discovers matching candidates from a simulated talent market, runs explainable match scoring, simulates conversational outreach, and returns a ranked shortlist with `Match Score`, `Interest Score`, `Confidence Score`, decision labels, transcript snippets, evidence paths, risk mitigations, interview questions, and recruiter next steps.
 
 ## Quick Start
 
@@ -21,7 +21,7 @@ Open `http://127.0.0.1:8000`.
 - Candidate discovery: simulated public profile, GitHub, portfolio, ATS, and CRM sourcing layer.
 - Matching: explainable scoring with exact skills, adjacent skills, seniority fit, domain fit, evidence depth, logistics, and differentiators.
 - Conversational outreach: simulated personalized opener, candidate response, follow-up, constraints, reservations, and next action.
-- Ranked recruiter output: combined ranking based on match and interest, with evidence, risks, and counterfactuals.
+- Ranked recruiter output: combined ranking based on match and interest, with confidence, evidence paths, risks, counterfactuals, interview questions, and a recruiter brief.
 - Documentation: architecture diagram, scoring logic, sample inputs and outputs, and one-page write-up.
 
 ## Architecture
@@ -34,8 +34,9 @@ flowchart LR
     D --> E["Match Scorer"]
     E --> F["Outreach Simulator"]
     F --> G["Ranker"]
-    G --> H["Recruiter Console"]
-    G --> I["JSON Export"]
+    G --> H["Decision Intelligence"]
+    H --> I["Recruiter Console"]
+    H --> J["JSON Export"]
 
     B --> B1["Skills, seniority, domains, constraints"]
     E --> E1["Explainable score breakdown"]
@@ -56,6 +57,18 @@ flowchart LR
 `Interest Score` is simulated from candidate drivers, responsiveness, remote/location fit, perceived role fit, availability, and reservations.
 
 `Combined Score = Match Score * 0.65 + Interest Score * 0.35`
+
+`Confidence Score` is not used to inflate ranking. It tells the recruiter how much evidence supports the ranking by looking at source depth, evidence paths, score agreement, responsiveness, and missing skill penalties.
+
+## Why This Is Different
+
+Most hackathon submissions stop at "paste JD, get candidates." TalentSignal adds a decision layer a recruiter can defend:
+
+- Evidence paths connect each claim to a source-style artifact.
+- Risk signals explain what could make a candidate fail later and how to mitigate it.
+- Interview questions are generated from the candidate's actual gaps and strengths.
+- Compliance audit states what signals are and are not used.
+- The discovery layer is swappable, but the ranking logic remains auditable.
 
 ## API
 

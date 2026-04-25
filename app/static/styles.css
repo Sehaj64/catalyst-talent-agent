@@ -259,6 +259,46 @@ button:focus-visible {
   margin-bottom: 16px;
 }
 
+.brief-panel {
+  margin-bottom: 16px;
+}
+
+.brief-panel.ready {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf9;
+}
+
+.brief-panel h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
+}
+
+.brief-panel p {
+  margin: 0 0 10px;
+  color: #34414d;
+  line-height: 1.45;
+}
+
+.brief-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.brief-grid ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.brief-grid li {
+  margin-bottom: 6px;
+  color: #34414d;
+  font-size: 13px;
+  line-height: 1.36;
+}
+
 .metric {
   padding: 12px;
   box-shadow: none;
@@ -393,7 +433,7 @@ button:focus-visible {
 
 .score-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(100px, 1fr));
+  grid-template-columns: repeat(4, minmax(90px, 1fr));
   gap: 10px;
   margin-bottom: 12px;
 }
@@ -443,6 +483,10 @@ button:focus-visible {
 
 .bar.combined i {
   background: var(--rose);
+}
+
+.bar.confidence i {
+  background: var(--green);
 }
 
 .explanation {
@@ -509,6 +553,35 @@ summary {
   line-height: 1.42;
 }
 
+.detail-block.full {
+  grid-column: 1 / -1;
+}
+
+.risk-pill {
+  display: inline-flex;
+  margin: 0 6px 6px 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.risk-pill.low {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.risk-pill.medium {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.risk-pill.high {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
 .detail-block p {
   margin: 0;
 }
@@ -569,7 +642,8 @@ summary {
 
   .summary-grid,
   .score-row,
-  .detail-grid {
+  .detail-grid,
+  .brief-grid {
     grid-template-columns: 1fr;
   }
 }
