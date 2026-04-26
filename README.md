@@ -12,37 +12,36 @@ We built this agent to solve measurable business problems:
 
 ## 🏗️ Architecture & Scoring Logic
 
-The system is built on an **Agentic AI** framework utilizing `gemini-3-pro-preview` (the latest experimental model in the 2026 sandbox) acting as a Principal Systems Architect.
+The system is built on a **Forensic Agentic AI** framework utilizing `gemini-3-pro-preview` acting as a Senior Principal Architect.
 
 ```mermaid
 graph TD;
-    A[Upload JD & Resume] --> B[Skill Extraction Engine]
-    B --> C{Seniority Detector}
-    C -->|Junior/Mid/Senior| D[Relative Difficulty Logic]
-    D --> E[Dynamic Interviewer Agent]
+    A[Upload JD & Resume] --> B[AI-Forensic Extraction Engine]
+    B --> C{Seniority & Domain Detector}
+    C -->|Junior/Mid/Senior| D[Relative Complexity Logic]
+    D --> E[Principal Interviewer Agent]
     E -->|Architect Scenario| F[Candidate Answer]
     F --> G[Proof-Hunter Agent]
-    G -->|Vague Answer| H[Identify Critical Risk]
-    G -->|Strong Answer| I[Verify Mastery]
-    H --> J[Scoring Engine]
-    I --> J
-    J --> K[Claim-to-Proof Ledger]
-    J --> L[Career Architect Agent]
-    L --> M[Personalized Learning Plan]
+    G -->|Vague Answer| H[Forensic Audit Engine]
+    G -->|Strong Answer| H
+    H --> I[100-Point Scoring Rubric]
+    I --> J[AI-Verified Claim-to-Proof Ledger]
+    I --> K[Technical Mentor Agent]
+    K --> L[Elite Upskilling Roadmap]
 ```
 
-### 🧠 The Scoring Logic
-Instead of a simple 1-10 rating, SkillProof uses a rigorous **100-point rubric**:
-- **Resume Evidence (Max 25):** Are their claims backed by the conversation?
-- **Answer Quality (Max 45):** Technical accuracy, specific tool mentions, and metrics.
-- **Practical Depth (Max 20):** Evidence of hands-on experience, tradeoffs, and troubleshooting.
-- **Confidence (Max 10):** Communication certainty and professional clarity.
+### 🧠 The Scoring Logic (100-Point Forensic Rubric)
+Instead of a simple rating, SkillProof uses a rigorous **Auditor's Rubric**:
+- **Resume Evidence (Max 25):** Are claims mapped to verifiable conversational signals?
+- **Answer Quality (Max 45):** Technical accuracy, specific tool mentions, and p99/scale metrics.
+- **Practical Depth (Max 20):** Evidence of tradeoffs (Why Tool A vs B?) and failure handling.
+- **Confidence (Max 10):** Communication certainty and lack of textbook definitions.
 
-## ✨ Key Features
-- **God-Tier Prompts**: The AI acts as a Principal Architect and is strictly instructed to NEVER repeat a topic.
-- **Relative Difficulty**: Automatically detects seniority (Junior/Mid/Senior) from the JD and adapts question complexity accordingly.
-- **Claim-to-Proof Ledger**: A transparent audit trail showing exactly which resume claims were proven and which were unproven.
-- **Zero-to-Expert Roadmaps**: The AI generates a customized learning plan with mandatory **Proof Artifacts** (mini-projects) instead of generic advice.
+## ✨ Key Features (God-Tier Accuracy)
+- **AI-Forensic Extraction**: Bypasses regex to use Gemini 3 Pro for mapping complex technical signals from JDs to Resumes.
+- **Relative Difficulty**: Automatically detects seniority (Junior/Mid/Senior) and adjusts scenario depth.
+- **Forensic Ledger**: A transparent, AI-audited trail showing which technical claims were "Proven" or "Flagged as Risk".
+- **Zero-to-Hero Roadmaps**: Generates production-grade projects (Proof Artifacts) specifically tailored to the gaps exposed in Turn X of the interview.
 
 ## 💻 Local Setup Instructions
 

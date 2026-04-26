@@ -202,11 +202,27 @@ def run_sample() -> None:
 
 
 def analyze_inputs() -> None:
-    # No caching here to avoid mutating global state
-    st.session_state.assessment = build_assessment(
-        st.session_state.jd_text,
-        st.session_state.resume_text,
-    )
+    api_key, _, _ = gemini_ai_config()
+    if api_key:
+        with st.spinner("🔍 Performing Forensic Skill Extraction with Gemini 3 Pro..."):
+             st.session_state.assessment = assessment_engine.extraction.extract_candidates_ai(
+                st.session_state.jd_text,
+                st.session_state.resume_text,
+                api_key
+            )
+             # Wrap the results in a proper Assessment object
+             st.session_state.assessment = assessment_engine.models.Assessment(
+                 jd_text=st.session_state.jd_text,
+                 resume_text=st.session_state.resume_text,
+                 skills=st.session_state.assessment,
+                 seniority=assessment_engine.detect_seniority(st.session_state.jd_text)
+             )
+    else:
+        st.session_state.assessment = build_assessment(
+            st.session_state.jd_text,
+            st.session_state.resume_text,
+        )
+    
     limit_assessment_for_interview()
     st.session_state.scored = None
     st.session_state.answers = {}
@@ -537,8 +553,8 @@ def render_ai_learning_plan(plans: list[dict]) -> None:
             <h3 style="margin:0; color:#1e3a8a;">🚀 {title} Roadmap</h3>
             <p style="margin:5px 0; font-weight:bold; color:#1e40af;">{priority} Priority | Estimated: {hours}</p>
             <div style="background:white; padding:15px; border-radius:5px; margin-top:10px; border: 1px solid #e2e8f0;">
+                <p style="margin-bottom:8px; color:#b91c1c;"><b>⚠️ Gap Analysis:</b> {plan.get('gap_analysis', 'Technical verification required.')}</p>
                 <p style="margin-bottom:8px;"><b>🎯 Target Level:</b> {plan.get('target_level')}</p>
-                <p style="margin-bottom:8px;"><b>💡 Strategic Rationale:</b> {plan.get('why_now')}</p>
                 <hr style="margin:15px 0; border:0; border-top: 1px solid #e2e8f0;">
                 <p style="margin-bottom:12px;"><b>🛠️ Proof Artifact (Mandatory Project):</b> <br><code style="color:#d97706; font-size:1.1em; background:#fff7ed; padding:4px 8px; border-radius:4px; display:block; margin-top:5px; border:1px dashed #fed7aa;">{plan.get('proof_artifact')}</code></p>
                 <p style="margin-bottom:8px;"><b>📚 Recommended Resources:</b><br>{' • '.join(plan.get('course_path', []))}</p>
@@ -691,27 +707,35 @@ with tabs[3]:
                 st.write("Why this gap was detected:", gap_reason(result))
 
 with tabs[4]:
-    st.subheader("Claim-to-Proof Ledger")
+    st.subheader("🛡️ AI-Forensic Claim-to-Proof Ledger")
     scored = st.session_state.scored
     if not scored:
         st.info("Extract skills in the Inputs tab to see the Claim-to-Proof Ledger.")
     else:
-        if not st.session_state.conversation_complete:
-            st.warning("⚠️ This ledger shows Resume Claims only. Complete the Live Assessment to verify them.")
         st.markdown(
-            '<div class="section-note">This is the audit trail: every resume claim is tied to JD priority, evidence, assessment proof, gap reason, and a concrete proof task.</div>',
+            '<div class="section-note">Forensic audit trail: Analyzing the gap between resume claims and verified technical signals.</div>',
             unsafe_allow_html=True,
         )
-        ledger = proof_ledger_rows(scored)
-        st.dataframe(ledger, hide_index=True, use_container_width=True)
+        
+        api_key, _, _ = gemini_ai_config()
+        if api_key:
+            with st.spinner("🕵️ Conducting Forensic Audit with Gemini 3 Pro..."):
+                try:
+                    audit = generate_ai_review(scored, st.session_state.learning_style, st.session_state.weekly_hours, api_key, GEMINI_ENDPOINT, GEMINI_MODEL)
+                    st.markdown("### 📝 Auditor Verdict")
+                    st.info(audit)
+                except:
+                    st.warning("Forensic summary generation delayed. Showing granular ledger.")
 
+        st.divider()
+        ledger = proof_ledger_rows(scored)
         for row in ledger:
-            with st.expander(f"{row['Skill claim']} | {row['Audit status']}"):
-                st.write("JD priority:", row["JD priority"])
-                st.write("Resume proof:", row["Resume proof"])
-                st.write("Assessment proof:", row["Assessment proof"])
-                st.write("Why it matters:", row["Why it matters"])
-                st.write("Proof task:", row["Proof task"])
+            status_color = "green" if "Verified" in row['Audit status'] or "backed" in row['Audit status'] else "orange"
+            with st.expander(f"Skill: {row['Skill claim']} — {row['Audit status']}"):
+                st.write(f"**Verification Status:** :{status_color}[{row['Audit status']}]")
+                st.markdown(f"**Resume Claim:** \n> {row['Resume proof']}")
+                st.markdown(f"**Assessment Proof:** \n {row['Assessment proof']}")
+                st.markdown(f"**Verification Protocol:** \n {row['Proof task']}")
 
 with tabs[2]:
     st.subheader("Personalized Learning Plan")

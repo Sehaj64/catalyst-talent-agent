@@ -82,14 +82,30 @@ def generate_adaptive_follow_up(skill: SkillCandidate, question: Question, displ
     return {"response_feedback": data.get("response_feedback", "Got it."), "follow_up": data.get("follow_up", res)}
 
 def generate_personalized_learning_plan(scored: ScoredAssessment, learning_style: str, weekly_hours: int, api_key: str, endpoint: str, model: str) -> list[dict[str, Any]]:
-    system = "Architect an elite 'Zero-to-Hero' roadmap for the gaps found. Return JSON: {\"plans\": [{\"skill\": \"...\", \"priority\": \"...\", \"target_level\": \"...\", \"why_now\": \"...\", \"estimated_hours\": \"...\", \"course_path\": [], \"proof_artifact\": \"...\", \"retest_prompt\": \"...\"}]}"
+    system = (
+        "You are a Senior Principal Architect and Technical Mentor. Create an ultra-structured 'Zero-to-Hero' roadmap.\n"
+        "STRICT RULES:\n"
+        "1. GAP ANALYSIS: Explicitly state which technical signal was missing in the interview.\n"
+        "2. PROOF ARTIFACT: Define a complex, production-grade project (not a simple app) to prove mastery.\n"
+        "3. ACCURACY: Base everything on the provided assessment data. No fluff.\n"
+        "Return JSON: {\"plans\": [{\"skill\": \"...\", \"priority\": \"...\", \"gap_analysis\": \"...\", \"target_level\": \"...\", \"estimated_hours\": \"...\", \"course_path\": [], \"proof_artifact\": \"...\", \"retest_prompt\": \"...\"}]}"
+    )
     user = json.dumps(assessment_payload(scored, learning_style, weekly_hours))
     
     res = call_gemini_native(api_key, system, user)
     data = parse_json_object(res)
-    return data.get("plans", [])
+    plans = data.get("plans", [])
+    for p in plans:
+        p.setdefault("why_now", p.get("gap_analysis", "Critical gap identified"))
+    return plans
 
 def generate_ai_review(scored: ScoredAssessment, learning_style: str, weekly_hours: int, api_key: str, endpoint: str, model: str) -> str:
-    system = "Provide a 1-paragraph high-level executive summary of this candidate's technical readiness and upskilling ROI."
+    system = (
+        "You are a Forensic Technical Lead. Audit this candidate's 'Claim-to-Proof' journey.\n"
+        "1. IDENTIFY: Which resume claims were successfully proven?\n"
+        "2. EXPOSE: Which claims were identified as risks/gaps?\n"
+        "3. ROI: What is the business impact of hiring vs. upskilling this specific candidate?\n"
+        "Write 2 sharp, professional paragraphs."
+    )
     user = json.dumps(assessment_payload(scored, learning_style, weekly_hours))
     return call_gemini_native(api_key, system, user)

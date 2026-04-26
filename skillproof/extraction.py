@@ -438,6 +438,52 @@ def evidence_quality(snippets: list[str]) -> int:
     return min(25, score)
 
 
+def extract_candidates_ai(jd_text: str, resume_text: str, api_key: str) -> list[SkillCandidate]:
+    """Uses Gemini 3 Pro for elite-level skill extraction and mapping."""
+    import json
+    import urllib.request
+    from skillproof.models import Question # Ensure import
+    
+    system = (
+        "You are a Senior Technical Recruiter and Architect. Extract technical skills from the JD and map them to Resume claims.\n"
+        "Return JSON: {\"skills\": [{\"name\": \"...\", \"category\": \"...\", \"criticality\": \"High/Medium\", \"jd_mentions\": [\"snippet\"], \"resume_evidence\": [\"snippet\"]}]}"
+    )
+    user = f"JOB DESCRIPTION:\n{jd_text[:3000]}\n\nRESUME:\n{resume_text[:3000]}"
+    
+    body = {
+        "system_instruction": {"parts": [{"text": system}]},
+        "contents": [{"role": "user", "parts": [{"text": user}]}],
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 2000}
+    }
+    
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key={api_key}"
+    req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST")
+    
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            text = res_data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            # Basic JSON extraction from markdown
+            import re
+            match = re.search(r'\{.*\}', text, re.DOTALL)
+            data = json.loads(match.group(0)) if match else {}
+            
+            candidates = []
+            for s in data.get("skills", [])[:10]:
+                candidates.append(SkillCandidate(
+                    name=s["name"],
+                    category=s["category"],
+                    criticality=s["criticality"],
+                    jd_mentions=s.get("jd_mentions", []),
+                    resume_evidence=s.get("resume_evidence", []),
+                    questions=[Question(prompt=f"Verify depth in {s['name']}", difficulty="Senior", signals=())], # Dynamic fallback
+                    adjacent_skills=[],
+                    resources=[]
+                ))
+            return candidates
+    except:
+        return extract_candidates(jd_text, resume_text) # Fallback to regex
+
 def extract_candidates(jd_text: str, resume_text: str) -> list[SkillCandidate]:
     jd_mentions = find_skill_mentions(jd_text)
     resume_mentions = find_skill_mentions(resume_text)
