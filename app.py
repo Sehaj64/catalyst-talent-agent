@@ -50,6 +50,9 @@ SAMPLE_JD = sample_data.SAMPLE_JD
 SAMPLE_RESUME = sample_data.SAMPLE_RESUME
 UPLOAD_TYPES = file_readers.supported_upload_types()
 FORMAT_LABEL = "PDF, DOCX, TXT/MD, CSV, or XLSX"
+MAX_INTERVIEW_SKILLS = 5
+QUESTIONS_PER_INTERVIEW_SKILL = 1
+INTERVIEW_CRITICALITY_ORDER = {"High": 0, "Medium": 1, "Resume-only": 2}
 
 
 st.set_page_config(
@@ -160,11 +163,37 @@ def clear_conversation() -> None:
     st.session_state.llm_question_notes = {}
 
 
+def limit_assessment_for_interview() -> None:
+    assessment = st.session_state.assessment
+    if not assessment:
+        return
+
+    def rank_skill(skill) -> tuple[int, int, int, int, str]:
+        return (
+            INTERVIEW_CRITICALITY_ORDER.get(skill.criticality, 3),
+            0 if skill.jd_mentions else 1,
+            -len(skill.resume_evidence),
+            0 if skill.category != "Role-specific skill" else 1,
+            skill.name.lower(),
+        )
+
+    ordered_skills = sorted(assessment.skills, key=rank_skill)
+    core_skills = [skill for skill in ordered_skills if skill.criticality in {"High", "Medium"}]
+    fallback_skills = [skill for skill in ordered_skills if skill.criticality not in {"High", "Medium"}]
+    selected_skills = (core_skills + fallback_skills)[:MAX_INTERVIEW_SKILLS]
+
+    for skill in selected_skills:
+        skill.questions = skill.questions[:QUESTIONS_PER_INTERVIEW_SKILL]
+
+    st.session_state.assessment.skills = selected_skills
+
+
 def load_sample() -> None:
     st.session_state.jd_text = SAMPLE_JD
     st.session_state.resume_text = SAMPLE_RESUME
     st.session_state.answers = SAMPLE_ANSWERS.copy()
     st.session_state.assessment = build_assessment(SAMPLE_JD, SAMPLE_RESUME)
+    limit_assessment_for_interview()
     st.session_state.scored = None
     clear_conversation()
 
@@ -183,6 +212,7 @@ def analyze_inputs() -> None:
         st.session_state.jd_text,
         st.session_state.resume_text,
     )
+    limit_assessment_for_interview()
     st.session_state.scored = None
     st.session_state.answers = {}
     clear_conversation()
@@ -413,20 +443,8 @@ def start_live_conversation() -> None:
     clear_conversation()
     if not st.session_state.assessment:
         return
-    
-    # Create a fresh copy of important skills to avoid mutating cached objects
-    all_skills = list(st.session_state.assessment.skills)
-    important_skills = [s for s in all_skills if s.criticality in {"High", "Medium"}]
-    
-    priority_order = {"High": 0, "Medium": 1}
-    sorted_important = sorted(important_skills, key=lambda x: priority_order.get(x.criticality, 2))
-    
-    # HARD LOCK: Exactly the top 5 important skills
-    interview_skills = sorted_important[:5]
-    
-    # Update the assessment object in session state with the limited list
-    st.session_state.assessment.skills = interview_skills
-    
+
+    limit_assessment_for_interview()
     st.session_state.conversation_started = True
     skill, question = current_conversation_item()
     if skill and question:
@@ -476,10 +494,8 @@ def render_skill_conversation() -> None:
         st.info("Extract required skills from the Inputs tab first.")
         return
 
-    # FINAL SAFEGUARD: Ensure the assessment being used is the limited one
-    if st.session_state.conversation_started and len(assessment.skills) > 5:
-         important_skills = [s for s in assessment.skills if s.criticality in {"High", "Medium"}]
-         st.session_state.assessment.skills = important_skills[:5]
+    limit_assessment_for_interview()
+    assessment = st.session_state.assessment
 
     st.info(f"⚡ **Current Protocol:** {conversation_progress()}. Answer with technical proof to unlock your validated roadmap.")
 
