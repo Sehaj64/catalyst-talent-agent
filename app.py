@@ -386,12 +386,16 @@ def get_display_follow_up(skill, question, answer_text: str) -> str:
 
 def main_question_message(skill, question) -> str:
     evidence = skill.resume_evidence[0] if skill.resume_evidence else "No direct resume example found yet."
-    question_number = st.session_state.conversation_question_index + 1
+    # Use skill index as the global question number (1 to 5)
+    question_number = st.session_state.conversation_skill_index + 1
+    total_questions = len(st.session_state.assessment.skills)
     displayed_question = get_display_question(skill, question)
     return (
-        f"**{skill.name}** | {skill.criticality} priority\n\n"
-        f"I’m checking this because the JD needs it. Resume clue: {evidence}\n\n"
-        f"Question {question_number}: {displayed_question}"
+        f"**Question {question_number} of {total_questions}**\n\n"
+        f"**Skill:** {skill.name} ({skill.criticality} priority)\n"
+        f"**Resume Context:** {evidence}\n\n"
+        f"--- \n"
+        f"{displayed_question}"
     )
 
 
@@ -400,14 +404,14 @@ def conversation_progress() -> str:
     if not assessment:
         return "No assessment started"
     if st.session_state.conversation_complete:
-        return "Conversation complete"
+        return "Assessment Complete"
     skill, question = current_conversation_item()
     if not skill or not question:
-        return "Conversation ready"
-    return (
-        f"Skill {st.session_state.conversation_skill_index + 1}/{len(assessment.skills)}: "
-        f"{skill.name}, question {st.session_state.conversation_question_index + 1}/{len(skill.questions)}"
-    )
+        return "Ready"
+    
+    current = st.session_state.conversation_skill_index + 1
+    total = len(assessment.skills)
+    return f"Progress: {current} of {total} technical scenarios"
 
 
 def start_live_conversation() -> None:
