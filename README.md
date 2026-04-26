@@ -18,7 +18,7 @@ The system is built on an **Agentic AI** framework utilizing `gemini-2.5-pro` (t
 graph TD;
     A[Upload JD & Resume] --> B[Skill Extraction Engine]
     B --> C{Priority Filter}
-    C -->|Top 3 Skills| D[Dynamic Interviewer Agent]
+    C -->|Top 5 Skills| D[Dynamic Interviewer Agent]
     D -->|Initial Scenario| E[Candidate Answer]
     E --> F[Proof-Hunter Agent]
     F -->|Vague Answer| G[Probe for Metrics/Details]
@@ -55,11 +55,12 @@ Instead of a simple 1-10 rating, SkillProof uses a rigorous **100-point rubric**
    pip install -r requirements.txt
    ```
 
-3. **Set your API Key:**
-   (Required to unlock the conversational assessment)
+3. **Set your Gemini API Key:**
+   (Required for Gemini-generated interview questions and the AI-personalized learning roadmap. Core extraction, scoring, and the local roadmap still run without it.)
    ```bash
    export GEMINI_API_KEY="your_api_key_here"
    ```
+   On Streamlit Cloud, add the same key as `GEMINI_API_KEY` or `GOOGLE_API_KEY` in App settings -> Secrets. The Learning Plan tab uses this same Gemini 2.5 Pro key and no longer has a separate API-key field.
 
 4. **Run the App:**
    ```bash

@@ -330,6 +330,10 @@ def question_ai_config() -> tuple[str, str, str]:
     return api_key, endpoint, model
 
 
+def gemini_ai_config() -> tuple[str, str, str]:
+    return secret_value("GEMINI_API_KEY", "GOOGLE_API_KEY"), GEMINI_ENDPOINT, GEMINI_MODEL
+
+
 def recent_interview_turns(limit: int = 8) -> list[dict[str, str]]:
     turns = []
     for message in st.session_state.chat_messages[-limit:]:
@@ -801,21 +805,12 @@ with tabs[2]:
             )
             st.session_state.weekly_hours = weekly_hours
         with ai_plan_col:
-            st.caption("Use Gemini/OpenRouter for a richer roadmap. The local plan still works without an API key.")
-            plan_api_key = st.text_input(
-                "AI plan API key",
-                type="password",
-                value=st.session_state.question_api_key,
-                placeholder="Optional; secrets also work",
-                key="learning_plan_api_key",
-            )
-            if plan_api_key:
-                st.session_state.question_api_key = plan_api_key
+            st.caption("Uses Gemini 2.5 Pro from Streamlit secrets for a richer roadmap. The local plan still works without it.")
             if st.button("Generate AI-personalized roadmap", type="primary", use_container_width=True):
-                api_key, endpoint, model = question_ai_config()
+                api_key, endpoint, model = gemini_ai_config()
                 if not api_key:
                     st.session_state.ai_learning_plan_error = (
-                        "Add a Gemini/OpenRouter API key in the Live Assessment question engine or Streamlit secrets."
+                        "Add GEMINI_API_KEY or GOOGLE_API_KEY in Streamlit secrets to generate the AI-personalized roadmap."
                     )
                     st.session_state.ai_learning_plan = []
                 else:
