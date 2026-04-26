@@ -308,9 +308,6 @@ def gemini_ai_config() -> tuple[str, str, str]:
     return secret_value("GEMINI_API_KEY", "GOOGLE_API_KEY"), GEMINI_ENDPOINT, GEMINI_MODEL
 
 
-def ai_mode_status(api_key: str, endpoint: str, model: str) -> str:
-    if not api_key:
-        return "AI mode: Gemini 3 Pro required (no Gemini key found)"
     return f"AI mode: Gemini active ({model})"
 
 
@@ -485,10 +482,7 @@ def render_skill_conversation() -> None:
     live_api_key, live_endpoint, live_model = gemini_ai_config()
     gemini_ready = bool(live_api_key)
     with st.expander("Question engine", expanded=False):
-        st.caption("Live Assessment uses Gemini 3 Pro from Streamlit secrets only.")
-        st.caption(ai_mode_status(live_api_key, live_endpoint, live_model))
-        if not gemini_ready:
-            st.warning("Add GEMINI_API_KEY or GOOGLE_API_KEY in Streamlit secrets to start the Gemini live assessment.")
+        st.write("Engine: Gemini 3 Pro (Architect Mode)")
 
     st.caption(conversation_progress())
     col_a, col_b, col_c, col_d = st.columns([1, 1, 1, 1])
@@ -594,11 +588,6 @@ tabs = st.tabs(
 
 with tabs[0]:
     st.subheader("Inputs")
-    inputs_api_key, _, _ = gemini_ai_config()
-    if inputs_api_key:
-        st.success("⚡ **AI Engine Active:** Gemini 3 Pro (Principal Architect Mode)")
-    else:
-        st.warning("Gemini 3 Pro is not configured yet. Add GEMINI_API_KEY or GOOGLE_API_KEY in Streamlit secrets.")
     st.markdown(
         f'<div class="section-note">Upload {FORMAT_LABEL} files or paste text manually. Spreadsheets are flattened with row and column labels so ATS exports and skill matrices still become assessment evidence.</div>',
         unsafe_allow_html=True,
@@ -773,16 +762,10 @@ with tabs[2]:
             )
             st.session_state.weekly_hours = weekly_hours
         with ai_plan_col:
-            st.caption("Uses Gemini 3 Pro from Streamlit secrets for a richer roadmap. The local plan still works without it.")
-            plan_status_api_key, plan_status_endpoint, plan_status_model = gemini_ai_config()
-            st.caption(ai_mode_status(plan_status_api_key, plan_status_endpoint, plan_status_model))
-            if not plan_status_api_key:
-                st.warning("Add GEMINI_API_KEY or GOOGLE_API_KEY in Streamlit secrets to generate the Gemini roadmap.")
             if st.button(
                 "Generate AI-personalized roadmap",
                 type="primary",
                 use_container_width=True,
-                disabled=not bool(plan_status_api_key),
             ):
                 api_key, endpoint, model = gemini_ai_config()
                 if not api_key:
