@@ -18,6 +18,7 @@ from skillproof.ai_assist import (
     generate_personalized_learning_plan,
 )
 import skillproof.assessment as assessment_engine
+import skillproof.extraction as extraction_engine
 import skillproof.file_readers as file_readers
 import skillproof.report as report_engine
 import skillproof.sample_data as sample_data
@@ -25,6 +26,7 @@ import skillproof.sample_data as sample_data
 
 file_readers = importlib.reload(file_readers)
 assessment_engine = importlib.reload(assessment_engine)
+extraction_engine = importlib.reload(extraction_engine)
 report_engine = importlib.reload(report_engine)
 sample_data = importlib.reload(sample_data)
 answer_key = assessment_engine.answer_key
@@ -205,16 +207,17 @@ def analyze_inputs() -> None:
     api_key, _, _ = gemini_ai_config()
     if api_key:
         with st.spinner("🔍 Analyzing Skills with Gemini..."):
-             st.session_state.assessment = assessment_engine.extraction.extract_candidates_ai(
+             skills = extraction_engine.extract_candidates_ai(
                 st.session_state.jd_text,
                 st.session_state.resume_text,
                 api_key
             )
              # Wrap the results in a proper Assessment object
-             st.session_state.assessment = assessment_engine.models.Assessment(
+             from skillproof.models import Assessment
+             st.session_state.assessment = Assessment(
                  jd_text=st.session_state.jd_text,
                  resume_text=st.session_state.resume_text,
-                 skills=st.session_state.assessment,
+                 skills=skills,
                  seniority=assessment_engine.detect_seniority(st.session_state.jd_text)
              )
     else:
