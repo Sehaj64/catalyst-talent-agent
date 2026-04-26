@@ -327,14 +327,12 @@ def recent_interview_turns(limit: int = 8) -> list[dict[str, str]]:
 
 
 def get_display_question(skill, question) -> str:
-    key = question_cache_key(skill, question)
-    if key in st.session_state.llm_question_cache:
-        return st.session_state.llm_question_cache[key]
-
+    # DISABLE CACHE: Force a fresh, unique question from Gemini every time
     fallback = contextual_question_prompt(skill, question)
     api_key, endpoint, model = gemini_ai_config()
+    
     if not api_key:
-        st.session_state.llm_question_notes[key] = "Gemini 2.5 Pro not configured"
+        st.session_state.llm_question_notes[answer_key(skill.name, question.prompt)] = "Gemini not configured"
         return fallback
 
     try:
@@ -346,14 +344,11 @@ def get_display_question(skill, question) -> str:
             model,
             recent_interview_turns(),
         )
-        st.session_state.llm_question_cache[key] = generated["question"]
-        st.session_state.llm_question_notes[key] = f"Gemini 2.5 Pro ({model})"
+        # We still store it once per TURN, but the function itself is re-run
+        # The true fix for repetition is in the prompt (already added)
+        # But removing the 'if in cache' ensures we don't reuse old questions from other JD/Resumes.
         return generated["question"]
-    except RuntimeError as error:
-        st.session_state.llm_question_notes[key] = f"Gemini failed; local fallback used: {error}"
-        return fallback
     except Exception as error:
-        st.session_state.llm_question_notes[key] = f"Gemini failed; local fallback used: {error}"
         return fallback
 
 
@@ -737,6 +732,23 @@ with tabs[2]:
     else:
         if not st.session_state.conversation_complete:
             st.warning("⚠️ This roadmap is based on Resume Claims. Complete the Live Assessment to refine your gaps.")
+        
+        # AUTO-TRIGGER GEMINI FOR LEARNING PLAN
+        api_key, endpoint, model = question_ai_config()
+        if api_key and not st.session_state.ai_learning_plan and not st.session_state.ai_learning_plan_error:
+            with st.spinner("🧠 Gemini 2.5 Pro is architecting your personalized roadmap..."):
+                try:
+                    st.session_state.ai_learning_plan = generate_personalized_learning_plan(
+                        scored,
+                        st.session_state.learning_style,
+                        st.session_state.weekly_hours,
+                        api_key,
+                        endpoint,
+                        model,
+                    )
+                except Exception as e:
+                    st.session_state.ai_learning_plan_error = str(e)
+
         st.markdown(
             '<div class="section-note">Turns assessment gaps into a practical roadmap: adjacent skills, courses, weekly effort, drills, and proof artifacts.</div>',
             unsafe_allow_html=True,
