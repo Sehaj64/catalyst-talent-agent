@@ -60,7 +60,7 @@ Instead of a simple 1-10 rating, SkillProof uses a rigorous **100-point rubric**
    ```bash
    export GEMINI_API_KEY="your_api_key_here"
    ```
-   On Streamlit Cloud, add the same key as `GEMINI_API_KEY` or `GOOGLE_API_KEY` in App settings -> Secrets. The Learning Plan tab uses this same Gemini 2.5 Pro key and no longer has a separate API-key field.
+   On Streamlit Cloud, add the same key as `GEMINI_API_KEY` or `GOOGLE_API_KEY` in App settings -> Secrets. Live Assessment and the Learning Plan tab both use this same Gemini 2.5 Pro key and no longer have separate AI provider or API-key fields.
 
 4. **Run the App:**
    ```bash

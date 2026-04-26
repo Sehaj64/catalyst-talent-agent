@@ -136,11 +136,6 @@ def ensure_state() -> None:
         "manual_minutes": 55,
         "agent_minutes": 14,
         "hourly_cost": 1000,
-        "ai_question_mode": True,
-        "question_provider": "Gemini",
-        "question_api_key": "",
-        "question_endpoint": GEMINI_ENDPOINT,
-        "question_model": GEMINI_MODEL,
         "llm_question_cache": {},
         "llm_follow_up_cache": {},
         "llm_question_notes": {},
@@ -309,41 +304,14 @@ def question_cache_key(skill, question) -> str:
     return answer_key(skill.name, question.prompt)
 
 
-def question_ai_config() -> tuple[str, str, str]:
-    provider = st.session_state.question_provider
-    if provider == "Gemini":
-        endpoint = GEMINI_ENDPOINT
-        model = GEMINI_MODEL
-        api_key = st.session_state.question_api_key or secret_value("GEMINI_API_KEY", "GOOGLE_API_KEY")
-    elif provider == "OpenRouter":
-        endpoint = OPENROUTER_ENDPOINT
-        model = OPENROUTER_MODEL
-        api_key = st.session_state.question_api_key or secret_value("OPENROUTER_API_KEY")
-    else:
-        endpoint = st.session_state.question_endpoint or DEFAULT_ENDPOINT
-        model = st.session_state.question_model or DEFAULT_MODEL
-        api_key = st.session_state.question_api_key or secret_value(
-            "OPENAI_COMPATIBLE_API_KEY",
-            "GEMINI_API_KEY",
-            "OPENROUTER_API_KEY",
-        )
-    return api_key, endpoint, model
-
-
 def gemini_ai_config() -> tuple[str, str, str]:
     return secret_value("GEMINI_API_KEY", "GOOGLE_API_KEY"), GEMINI_ENDPOINT, GEMINI_MODEL
 
 
-def ai_mode_status(api_key: str, endpoint: str, model: str, enabled: bool = True) -> str:
-    if not enabled:
-        return "AI mode: local fallback (LLM toggle is off)"
+def ai_mode_status(api_key: str, endpoint: str, model: str) -> str:
     if not api_key:
-        if "googleapis.com" in endpoint:
-            return "AI mode: local fallback (no Gemini key found)"
-        return "AI mode: local fallback (no API key found)"
-    if "googleapis.com" in endpoint:
-        return f"AI mode: Gemini active ({model})"
-    return f"AI mode: external provider active ({model})"
+        return "AI mode: Gemini 2.5 Pro required (no Gemini key found)"
+    return f"AI mode: Gemini active ({model})"
 
 
 def recent_interview_turns(limit: int = 8) -> list[dict[str, str]]:
@@ -364,16 +332,9 @@ def get_display_question(skill, question) -> str:
         return st.session_state.llm_question_cache[key]
 
     fallback = contextual_question_prompt(skill, question)
-    if not st.session_state.ai_question_mode:
-        st.session_state.llm_question_notes[key] = "Local fallback: LLM toggle is off"
-        return fallback
-
-    api_key, endpoint, model = question_ai_config()
+    api_key, endpoint, model = gemini_ai_config()
     if not api_key:
-        if "googleapis.com" in endpoint:
-            st.session_state.llm_question_notes[key] = "Local fallback: no Gemini key found"
-        else:
-            st.session_state.llm_question_notes[key] = "Local fallback: no API key found"
+        st.session_state.llm_question_notes[key] = "Gemini 2.5 Pro not configured"
         return fallback
 
     try:
@@ -386,16 +347,13 @@ def get_display_question(skill, question) -> str:
             recent_interview_turns(),
         )
         st.session_state.llm_question_cache[key] = generated["question"]
-        if "googleapis.com" in endpoint:
-            st.session_state.llm_question_notes[key] = f"Gemini 2.5 Pro ({model})"
-        else:
-            st.session_state.llm_question_notes[key] = f"External provider ({model})"
+        st.session_state.llm_question_notes[key] = f"Gemini 2.5 Pro ({model})"
         return generated["question"]
     except RuntimeError as error:
-        st.session_state.llm_question_notes[key] = f"Local fallback: {error}"
+        st.session_state.llm_question_notes[key] = f"Gemini failed; local fallback used: {error}"
         return fallback
     except Exception as error:
-        st.session_state.llm_question_notes[key] = f"Local fallback: {error}"
+        st.session_state.llm_question_notes[key] = f"Gemini failed; local fallback used: {error}"
         return fallback
 
 
@@ -406,10 +364,8 @@ def get_display_follow_up(skill, question, answer_text: str) -> str:
 
     displayed_question = get_display_question(skill, question)
     fallback = contextual_follow_up_prompt(skill, question, answer_text)
-    if not st.session_state.ai_question_mode:
-        return fallback
 
-    api_key, endpoint, model = question_ai_config()
+    api_key, endpoint, model = gemini_ai_config()
     if not api_key:
         return fallback
 
@@ -468,6 +424,9 @@ def start_live_conversation() -> None:
     clear_conversation()
     if not st.session_state.assessment:
         return
+    api_key, _, _ = gemini_ai_config()
+    if not api_key:
+        return
 
     limit_assessment_for_interview()
     st.session_state.conversation_started = True
@@ -525,52 +484,21 @@ def render_skill_conversation() -> None:
     st.info(f"⚡ **Current Protocol:** {conversation_progress()}. Answer with technical proof to unlock your validated roadmap.")
 
     st.markdown(
-        '<div class="section-note">SkillProof interviews one skill at a time. With Gemini/OpenRouter, each question uses the JD, resume evidence, recent answers, and the current candidate reply.</div>',
+        '<div class="section-note">SkillProof interviews one skill at a time. Live Assessment questions are generated with Gemini 2.5 Pro using the JD, resume evidence, recent answers, and the current candidate reply.</div>',
         unsafe_allow_html=True,
     )
+    live_api_key, live_endpoint, live_model = gemini_ai_config()
+    gemini_ready = bool(live_api_key)
     with st.expander("Question engine", expanded=False):
-        st.session_state.ai_question_mode = st.toggle(
-            "Use LLM-generated questions when an API key is available",
-            value=bool(st.session_state.ai_question_mode),
-        )
-        q1, q2, q3 = st.columns([1, 2, 2])
-        with q1:
-            st.session_state.question_provider = st.selectbox(
-                "Provider",
-                ["Gemini", "OpenRouter", "Custom OpenAI-compatible"],
-                index=["Gemini", "OpenRouter", "Custom OpenAI-compatible"].index(
-                    st.session_state.question_provider
-                ),
-                key="question_provider_select"
-            )
-        with q2:
-            st.session_state.question_api_key = st.text_input(
-                "API key",
-                type="password",
-                value=st.session_state.question_api_key,
-                placeholder="Optional; Streamlit secrets also work",
-            )
-        with q3:
-            st.caption("Gemini makes the interview more natural. The local fallback still changes with the JD and resume.")
-        if st.session_state.question_provider == "Custom OpenAI-compatible":
-            custom_left, custom_right = st.columns(2)
-            with custom_left:
-                st.session_state.question_endpoint = st.text_input(
-                    "Endpoint",
-                    value=st.session_state.question_endpoint or DEFAULT_ENDPOINT,
-                )
-            with custom_right:
-                st.session_state.question_model = st.text_input(
-                    "Model",
-                    value=st.session_state.question_model or DEFAULT_MODEL,
-                )
-        status_api_key, status_endpoint, status_model = question_ai_config()
-        st.caption(ai_mode_status(status_api_key, status_endpoint, status_model, st.session_state.ai_question_mode))
+        st.caption("Live Assessment uses Gemini 2.5 Pro from Streamlit secrets only.")
+        st.caption(ai_mode_status(live_api_key, live_endpoint, live_model))
+        if not gemini_ready:
+            st.warning("Add GEMINI_API_KEY or GOOGLE_API_KEY in Streamlit secrets to start the Gemini live assessment.")
 
     st.caption(conversation_progress())
     col_a, col_b, col_c, col_d = st.columns([1, 1, 1, 1])
     with col_a:
-        if st.button("Start live assessment", type="primary"):
+        if st.button("Start live assessment", type="primary", disabled=not gemini_ready):
             start_live_conversation()
             st.rerun()
     with col_b:
@@ -597,7 +525,7 @@ def render_skill_conversation() -> None:
     if st.session_state.conversation_complete:
         st.success("Conversation complete. Score it to generate the report.")
 
-    reply = st.chat_input("Reply to SkillProof AI...")
+    reply = st.chat_input("Reply to SkillProof AI...", disabled=not gemini_ready)
     if reply:
         if not st.session_state.conversation_started:
             start_live_conversation()
@@ -671,8 +599,11 @@ tabs = st.tabs(
 
 with tabs[0]:
     st.subheader("Inputs")
-    if st.session_state.question_provider == "Gemini":
+    inputs_api_key, _, _ = gemini_ai_config()
+    if inputs_api_key:
         st.success("⚡ **AI Engine Active:** Gemini 2.5 Pro (Principal Architect Mode)")
+    else:
+        st.warning("Gemini 2.5 Pro is not configured yet. Add GEMINI_API_KEY or GOOGLE_API_KEY in Streamlit secrets.")
     st.markdown(
         f'<div class="section-note">Upload {FORMAT_LABEL} files or paste text manually. Spreadsheets are flattened with row and column labels so ATS exports and skill matrices still become assessment evidence.</div>',
         unsafe_allow_html=True,
@@ -833,7 +764,14 @@ with tabs[2]:
             st.caption("Uses Gemini 2.5 Pro from Streamlit secrets for a richer roadmap. The local plan still works without it.")
             plan_status_api_key, plan_status_endpoint, plan_status_model = gemini_ai_config()
             st.caption(ai_mode_status(plan_status_api_key, plan_status_endpoint, plan_status_model))
-            if st.button("Generate AI-personalized roadmap", type="primary", use_container_width=True):
+            if not plan_status_api_key:
+                st.warning("Add GEMINI_API_KEY or GOOGLE_API_KEY in Streamlit secrets to generate the Gemini roadmap.")
+            if st.button(
+                "Generate AI-personalized roadmap",
+                type="primary",
+                use_container_width=True,
+                disabled=not bool(plan_status_api_key),
+            ):
                 api_key, endpoint, model = gemini_ai_config()
                 if not api_key:
                     st.session_state.ai_learning_plan_error = (
