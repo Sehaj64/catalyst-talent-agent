@@ -1,135 +1,1052 @@
-import streamlit as st
-import pandas as pd
+from __future__ import annotations
+
+import importlib
 import os
-import sys
-from src.utils import (
-    read_docx,
-    read_pdf,
-    read_excel_csv,
-    analyze_job_description,
-    calculate_advanced_match,
-    generate_initial_greeting,
-    get_agent_reply,
-    evaluate_final_interest
+
+import streamlit as st
+
+from skillproof.ai_assist import (
+    DEFAULT_ENDPOINT,
+    DEFAULT_MODEL,
+    GEMINI_ENDPOINT,
+    GEMINI_MODEL,
+    OPENROUTER_ENDPOINT,
+    OPENROUTER_MODEL,
+    generate_adaptive_follow_up,
+    generate_ai_review,
+    generate_assessment_question,
+    generate_personalized_learning_plan,
+)
+import skillproof.assessment as assessment_engine
+import skillproof.file_readers as file_readers
+import skillproof.report as report_engine
+import skillproof.sample_data as sample_data
+
+
+file_readers = importlib.reload(file_readers)
+assessment_engine = importlib.reload(assessment_engine)
+report_engine = importlib.reload(report_engine)
+sample_data = importlib.reload(sample_data)
+answer_key = assessment_engine.answer_key
+build_assessment = assessment_engine.build_assessment
+contextual_question_prompt = assessment_engine.contextual_question_prompt
+contextual_follow_up_prompt = assessment_engine.contextual_follow_up_prompt
+follow_up_key = assessment_engine.follow_up_key
+follow_up_prompt = assessment_engine.follow_up_prompt
+score_assessment = assessment_engine.score_assessment
+accuracy_lift_estimate = report_engine.accuracy_lift_estimate
+build_markdown_report = report_engine.build_markdown_report
+evidence_status = report_engine.evidence_status
+executive_summary = report_engine.executive_summary
+gap_reason = report_engine.gap_reason
+gap_priority = report_engine.gap_priority
+learning_plan_rows = report_engine.learning_plan_rows
+proof_ledger_rows = report_engine.proof_ledger_rows
+roi_projection = report_engine.roi_projection
+readiness_summary = report_engine.readiness_summary
+skill_choice_reason = report_engine.skill_choice_reason
+SAMPLE_ANSWERS = sample_data.SAMPLE_ANSWERS
+SAMPLE_JD = sample_data.SAMPLE_JD
+SAMPLE_RESUME = sample_data.SAMPLE_RESUME
+UPLOAD_TYPES = file_readers.supported_upload_types()
+FORMAT_LABEL = "PDF, DOCX, TXT/MD, CSV, or XLSX"
+
+
+st.set_page_config(
+    page_title="SkillProof AI",
+    page_icon="SP",
+    layout="wide",
 )
 
-# Ensure root is in path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-st.set_page_config(layout="wide", page_title="Catalyst AI Talent Agent")
+st.markdown(
+    """
+    <style>
+    .block-container { padding-top: 1.25rem; }
+    .hero {
+        border: 1px solid #d0d7e2;
+        background: #f8fafc;
+        padding: 18px 20px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+    }
+    .hero h1 {
+        margin: 0 0 6px 0;
+        font-size: 2rem;
+        line-height: 1.15;
+    }
+    .hero p {
+        margin: 0;
+        color: #475467;
+        font-size: 1rem;
+    }
+    .metric-card {
+        border: 1px solid #d0d7e2;
+        border-radius: 8px;
+        padding: 14px 16px;
+        background: white;
+        min-height: 104px;
+    }
+    .metric-card .label {
+        color: #667085;
+        font-size: .82rem;
+        margin-bottom: 8px;
+    }
+    .metric-card .value {
+        color: #101828;
+        font-size: 1.45rem;
+        font-weight: 720;
+        margin-bottom: 5px;
+    }
+    .metric-card .note {
+        color: #475467;
+        font-size: .86rem;
+    }
+    .section-note {
+        color: #475467;
+        font-size: .92rem;
+        margin-bottom: 10px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-# --- API Key Handling ---
-gemini_api_key = os.environ.get("GOOGLE_API_KEY") 
-if not gemini_api_key:
+
+def ensure_state() -> None:
+    defaults = {
+        "jd_text": "",
+        "resume_text": "",
+        "assessment": None,
+        "answers": {},
+        "scored": None,
+        "ai_review": "",
+        "chat_messages": [],
+        "conversation_started": False,
+        "conversation_complete": False,
+        "conversation_skill_index": 0,
+        "conversation_question_index": 0,
+        "conversation_waiting_follow_up": False,
+        "learning_style": "Project-based",
+        "weekly_hours": 6,
+        "candidates": 60,
+        "manual_minutes": 55,
+        "agent_minutes": 14,
+        "hourly_cost": 1000,
+        "ai_question_mode": True,
+        "question_provider": "Gemini",
+        "question_api_key": "",
+        "question_endpoint": GEMINI_ENDPOINT,
+        "question_model": GEMINI_MODEL,
+        "llm_question_cache": {},
+        "llm_follow_up_cache": {},
+        "llm_question_notes": {},
+        "ai_learning_plan": [],
+        "ai_learning_plan_error": "",
+    }
+    for key, value in defaults.items():
+        st.session_state.setdefault(key, value)
+
+
+def clear_conversation() -> None:
+    st.session_state.chat_messages = []
+    st.session_state.conversation_started = False
+    st.session_state.conversation_complete = False
+    st.session_state.conversation_skill_index = 0
+    st.session_state.conversation_question_index = 0
+    st.session_state.conversation_waiting_follow_up = False
+    st.session_state.llm_question_cache = {}
+    st.session_state.llm_follow_up_cache = {}
+    st.session_state.llm_question_notes = {}
+
+
+def load_sample() -> None:
+    st.session_state.jd_text = SAMPLE_JD
+    st.session_state.resume_text = SAMPLE_RESUME
+    st.session_state.answers = SAMPLE_ANSWERS.copy()
+    st.session_state.assessment = build_assessment(SAMPLE_JD, SAMPLE_RESUME)
+    st.session_state.scored = None
+    clear_conversation()
+
+
+def run_sample() -> None:
+    load_sample()
+    st.session_state.scored = score_assessment(
+        st.session_state.assessment,
+        st.session_state.answers,
+    )
+
+
+@st.cache_data
+def cached_build_assessment(jd, resume):
+    return build_assessment(jd, resume)
+
+def analyze_inputs() -> None:
+    st.session_state.assessment = cached_build_assessment(
+        st.session_state.jd_text,
+        st.session_state.resume_text,
+    )
+    st.session_state.scored = None
+    st.session_state.answers = {}
+    clear_conversation()
+
+
+def score_current_assessment() -> None:
+    st.session_state.scored = score_assessment(
+        st.session_state.assessment,
+        st.session_state.answers,
+    )
+    st.session_state.ai_review = ""
+    st.session_state.ai_learning_plan = []
+    st.session_state.ai_learning_plan_error = ""
+
+
+def secret_value(*names: str) -> str:
+    for name in names:
+        try:
+            value = st.secrets.get(name, "")
+        except Exception:
+            value = ""
+        if value:
+            return str(value)
+        value = os.getenv(name, "")
+        if value:
+            return value
+    return ""
+
+
+def apply_upload(target_key: str, uploaded_file) -> None:
+    if uploaded_file is None:
+        return
+    text = file_readers.read_uploaded_file(uploaded_file)
+    if text:
+        st.session_state[target_key] = text
+        st.caption(f"Parsed {len(text):,} characters from {uploaded_file.name}.")
+    else:
+        st.warning(f"Could not read {uploaded_file.name}. Please paste the text manually.")
+
+
+def metric_card(label: str, value: str, note: str) -> None:
+    st.markdown(
+        f"""
+        <div class="metric-card">
+            <div class="label">{label}</div>
+            <div class="value">{value}</div>
+            <div class="note">{note}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def skill_matrix_rows() -> list[dict[str, str | int]]:
+    assessment = st.session_state.assessment
+    if not assessment:
+        return []
+    return [
+        {
+            "Skill": skill.name,
+            "Category": skill.category,
+            "JD priority": skill.criticality,
+            "Resume evidence snippets": len(skill.resume_evidence),
+            "Questions": len(skill.questions),
+            "Why chosen": (
+                "Required or role-relevant skill from the JD"
+                if skill.criticality in {"High", "Medium"}
+                else "Resume skill that may support adjacent learning"
+            ),
+        }
+        for skill in assessment.skills
+    ]
+
+
+def current_conversation_item():
+    assessment = st.session_state.assessment
+    if not assessment or st.session_state.conversation_skill_index >= len(assessment.skills):
+        return None, None
+    skill = assessment.skills[st.session_state.conversation_skill_index]
+    if st.session_state.conversation_question_index >= len(skill.questions):
+        return None, None
+    return skill, skill.questions[st.session_state.conversation_question_index]
+
+
+def add_assistant_message(content: str) -> None:
+    st.session_state.chat_messages.append({"role": "assistant", "content": content})
+
+
+def add_user_message(content: str) -> None:
+    st.session_state.chat_messages.append({"role": "user", "content": content})
+
+
+def question_cache_key(skill, question) -> str:
+    return answer_key(skill.name, question.prompt)
+
+
+def question_ai_config() -> tuple[str, str, str]:
+    provider = st.session_state.question_provider
+    if provider == "Gemini":
+        endpoint = GEMINI_ENDPOINT
+        model = GEMINI_MODEL
+        api_key = st.session_state.question_api_key or secret_value("GEMINI_API_KEY", "GOOGLE_API_KEY")
+    elif provider == "OpenRouter":
+        endpoint = OPENROUTER_ENDPOINT
+        model = OPENROUTER_MODEL
+        api_key = st.session_state.question_api_key or secret_value("OPENROUTER_API_KEY")
+    else:
+        endpoint = st.session_state.question_endpoint or DEFAULT_ENDPOINT
+        model = st.session_state.question_model or DEFAULT_MODEL
+        api_key = st.session_state.question_api_key or secret_value(
+            "OPENAI_COMPATIBLE_API_KEY",
+            "GEMINI_API_KEY",
+            "OPENROUTER_API_KEY",
+        )
+    return api_key, endpoint, model
+
+
+def recent_interview_turns(limit: int = 8) -> list[dict[str, str]]:
+    turns = []
+    for message in st.session_state.chat_messages[-limit:]:
+        turns.append(
+            {
+                "role": str(message.get("role", "")),
+                "content": str(message.get("content", ""))[:900],
+            }
+        )
+    return turns
+
+
+def get_display_question(skill, question) -> str:
+    key = question_cache_key(skill, question)
+    if key in st.session_state.llm_question_cache:
+        return st.session_state.llm_question_cache[key]
+
+    fallback = contextual_question_prompt(skill, question)
+    if not st.session_state.ai_question_mode:
+        return fallback
+
+    api_key, endpoint, model = question_ai_config()
+    if not api_key:
+        return fallback
+
     try:
-        gemini_api_key = st.secrets["GEMINI_API_KEY"]
-    except:
-        gemini_api_key = None
+        generated = generate_assessment_question(
+            skill,
+            question,
+            api_key,
+            endpoint,
+            model,
+            recent_interview_turns(),
+        )
+        st.session_state.llm_question_cache[key] = generated["question"]
+        if generated.get("interviewer_intent"):
+            st.session_state.llm_question_notes[key] = generated["interviewer_intent"]
+        return generated["question"]
+    except RuntimeError as error:
+        st.session_state.llm_question_notes[key] = f"Local fallback: {error}"
+        return fallback
+    except Exception as error:
+        st.session_state.llm_question_notes[key] = f"Local fallback: {error}"
+        return fallback
 
-if not gemini_api_key:
-    st.error("?? API Key Missing! Please set it in .streamlit/secrets.toml")
-    st.stop()
 
-# --- Session State ---
-if 'analysis_done' not in st.session_state:
-    st.session_state.analysis_done = False
-if 'ranked_candidates' not in st.session_state:
-    st.session_state.ranked_candidates = []
-if 'engagement_logs' not in st.session_state:
-    st.session_state.engagement_logs = {} 
+def get_display_follow_up(skill, question, answer_text: str) -> str:
+    key = f"{question_cache_key(skill, question)}::{len(answer_text)}::{hash(answer_text)}"
+    if key in st.session_state.llm_follow_up_cache:
+        return st.session_state.llm_follow_up_cache[key]
 
-st.title("?? Catalyst AI: Advanced Talent Agent")
-st.markdown("Multi-format Support: PDF, DOCX, CSV, Excel")
+    displayed_question = get_display_question(skill, question)
+    fallback = contextual_follow_up_prompt(skill, question, answer_text)
+    if not st.session_state.ai_question_mode:
+        return fallback
 
-# --- Sidebar ---
-with st.sidebar:
-    st.header("1. Input Data")
-    jd_file = st.file_uploader("Upload Job Description", type=["docx", "pdf", "csv", "xlsx"])
-    resume_files = st.file_uploader("Upload Resumes", type=["docx", "pdf", "csv", "xlsx"], accept_multiple_files=True)
+    api_key, endpoint, model = question_ai_config()
+    if not api_key:
+        return fallback
+
+    try:
+        generated = generate_adaptive_follow_up(
+            skill,
+            question,
+            displayed_question,
+            answer_text,
+            api_key,
+            endpoint,
+            model,
+        )
+        feedback = generated.get("response_feedback", "").strip()
+        follow_up = generated["follow_up"].strip()
+        message = f"{feedback}\n\n{follow_up}" if feedback else follow_up
+        st.session_state.llm_follow_up_cache[key] = message
+        return message
+    except RuntimeError:
+        return f"Thanks. I want to make that answer easier to verify.\n\n{fallback}"
+    except Exception:
+        return f"Thanks. I want to make that answer easier to verify.\n\n{fallback}"
+
+
+def main_question_message(skill, question) -> str:
+    evidence = skill.resume_evidence[0] if skill.resume_evidence else "No direct resume example found yet."
+    question_number = st.session_state.conversation_question_index + 1
+    displayed_question = get_display_question(skill, question)
+    return (
+        f"**{skill.name}** | {skill.criticality} priority\n\n"
+        f"I’m checking this because the JD needs it. Resume clue: {evidence}\n\n"
+        f"Question {question_number}: {displayed_question}"
+    )
+
+
+def conversation_progress() -> str:
+    assessment = st.session_state.assessment
+    if not assessment:
+        return "No assessment started"
+    if st.session_state.conversation_complete:
+        return "Conversation complete"
+    skill, question = current_conversation_item()
+    if not skill or not question:
+        return "Conversation ready"
+    return (
+        f"Skill {st.session_state.conversation_skill_index + 1}/{len(assessment.skills)}: "
+        f"{skill.name}, question {st.session_state.conversation_question_index + 1}/{len(skill.questions)}"
+    )
+
+
+def start_live_conversation() -> None:
+    clear_conversation()
+    if not st.session_state.assessment:
+        return
     
-    if st.button("Run AI Scout", type="primary"):
-        if jd_file and resume_files:
-            with st.spinner("?? AI Processing..."):
-                # Parse JD
-                if jd_file.name.endswith(('.csv', '.xlsx', '.xls')):
-                    jd_text = read_excel_csv(jd_file)
-                elif jd_file.name.endswith('.docx'):
-                    jd_text = read_docx(jd_file)
-                else:
-                    jd_text = read_pdf(jd_file)
-                
-                jd_data = analyze_job_description(jd_text, gemini_api_key)
-                st.session_state.jd_data = jd_data
+    # FINITE MODE: Top 5 most critical skills
+    all_skills = st.session_state.assessment.skills
+    priority_order = {"High": 0, "Medium": 1, "Resume-only": 2}
+    sorted_skills = sorted(all_skills, key=lambda x: priority_order.get(x.criticality, 3))
+    st.session_state.assessment.skills = sorted_skills[:5] # Exactly 5 skills
+    
+    st.session_state.conversation_started = True
+    skill, question = current_conversation_item()
+    if skill and question:
+        add_assistant_message(main_question_message(skill, question))
 
-                # Parse & Match Resumes
-                candidate_data = []
-                for res_file in resume_files:
-                    if res_file.name.endswith(('.csv', '.xlsx', '.xls')):
-                        res_text = read_excel_csv(res_file)
-                    elif res_file.name.endswith('.docx'):
-                        res_text = read_docx(res_file)
-                    else:
-                        res_text = read_pdf(res_file)
-                    
-                    if res_text:
-                        match = calculate_advanced_match(jd_data, res_text, gemini_api_key)
-                        candidate_data.append({
-                            "name": res_file.name,
-                            "skills": match.get("extracted_candidate_skills", []),
-                            "match_percentage": match.get("match_score", 0),
-                            "explanation": match.get("explanation", "N/A"),
-                            "interest_score": 0,
-                            "status": "Scouted"
-                        })
 
-                candidate_data.sort(key=lambda x: x['match_percentage'], reverse=True)
-                st.session_state.ranked_candidates = candidate_data
-                st.session_state.analysis_done = True
+def move_to_next_question() -> None:
+    assessment = st.session_state.assessment
+    if not assessment:
+        return
+
+    # 1 Question per skill = Exactly 5 turns
+    st.session_state.conversation_skill_index += 1
+    st.session_state.conversation_question_index = 0
+
+    if st.session_state.conversation_skill_index >= len(assessment.skills):
+        st.session_state.conversation_complete = True
+        add_assistant_message(
+            "The technical assessment is complete. Click **Score conversation** to see your verified results and ROI analysis."
+        )
+        return
+
+    skill, question = current_conversation_item()
+    if skill and question:
+        add_assistant_message(main_question_message(skill, question))
+
+
+def handle_chat_reply(reply: str) -> None:
+    reply = reply.strip()
+    if not reply or st.session_state.conversation_complete:
+        return
+    skill, question = current_conversation_item()
+    if not skill or not question:
+        return
+
+    add_user_message(reply)
+    
+    # Record answer and move to next skill immediately
+    st.session_state.answers[answer_key(skill.name, question.prompt)] = reply
+    move_to_next_question()
+
+
+def render_skill_conversation() -> None:
+    st.subheader("🛡️ Verifiable Skill Assessment")
+    st.info("⚡ **Protocol:** I will ask exactly **5 deep technical scenario questions** (one per core skill). Answer with specific technical evidence to prove your proficiency.")
+    assessment = st.session_state.assessment
+    if not assessment:
+        st.info("Extract required skills from the Inputs tab first.")
+        return
+
+    st.markdown(
+        '<div class="section-note">SkillProof interviews one skill at a time. With Gemini/OpenRouter, each question uses the JD, resume evidence, recent answers, and the current candidate reply.</div>',
+        unsafe_allow_html=True,
+    )
+    with st.expander("Question engine", expanded=False):
+        st.session_state.ai_question_mode = st.toggle(
+            "Use LLM-generated questions when an API key is available",
+            value=bool(st.session_state.ai_question_mode),
+        )
+        q1, q2, q3 = st.columns([1, 2, 2])
+        with q1:
+            st.session_state.question_provider = st.selectbox(
+                "Provider",
+                ["Gemini", "OpenRouter", "Custom OpenAI-compatible"],
+                index=["Gemini", "OpenRouter", "Custom OpenAI-compatible"].index(
+                    st.session_state.question_provider
+                ),
+                key="question_provider_select"
+            )
+        with q2:
+            st.session_state.question_api_key = st.text_input(
+                "API key",
+                type="password",
+                value=st.session_state.question_api_key,
+                placeholder="Optional; Streamlit secrets also work",
+            )
+        with q3:
+            st.caption("Gemini makes the interview more natural. The local fallback still changes with the JD and resume.")
+        if st.session_state.question_provider == "Custom OpenAI-compatible":
+            custom_left, custom_right = st.columns(2)
+            with custom_left:
+                st.session_state.question_endpoint = st.text_input(
+                    "Endpoint",
+                    value=st.session_state.question_endpoint or DEFAULT_ENDPOINT,
+                )
+            with custom_right:
+                st.session_state.question_model = st.text_input(
+                    "Model",
+                    value=st.session_state.question_model or DEFAULT_MODEL,
+                )
+
+    st.caption(conversation_progress())
+    col_a, col_b, col_c, col_d = st.columns([1, 1, 1, 1])
+    with col_a:
+        if st.button("Start live assessment", type="primary"):
+            start_live_conversation()
+            st.rerun()
+    with col_b:
+        if st.button("Skip to next skill"):
+            move_to_next_question()
+            st.rerun()
+    with col_c:
+        if st.button("Restart chat"):
+            start_live_conversation()
+            st.rerun()
+    with col_d:
+        score_disabled = not st.session_state.conversation_started
+        if st.button("Score conversation", type="primary", disabled=score_disabled):
+            score_current_assessment()
+            st.success("Assessment scored. Reports are unlocked.")
+
+    if not st.session_state.conversation_started:
+        st.info("Click **Start live assessment** to begin the back-and-forth interview.")
+    else:
+        for message in st.session_state.chat_messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+    if st.session_state.conversation_complete:
+        st.success("Conversation complete. Score it to generate the report.")
+
+    reply = st.chat_input("Reply to SkillProof AI...")
+    if reply:
+        if not st.session_state.conversation_started:
+            start_live_conversation()
+        handle_chat_reply(reply)
+        st.rerun()
+
+    with st.expander("Extracted skills and evidence", expanded=False):
+        st.dataframe(skill_matrix_rows(), hide_index=True, use_container_width=True)
+
+
+def render_ai_learning_plan(plans: list[dict]) -> None:
+    for plan in plans:
+        title = plan.get("skill") or "Skill"
+        priority = plan.get("priority") or "Priority"
+        hours = plan.get("estimated_hours") or "time estimate"
+        
+        # High-impact card UI
+        st.markdown(f"""
+        <div style="border-left: 5px solid #2563eb; padding: 15px; background: #f1f5f9; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+            <h3 style="margin:0; color:#1e3a8a;">🚀 {title} Roadmap</h3>
+            <p style="margin:5px 0; font-weight:bold; color:#1e40af;">{priority} Priority | Estimated: {hours}</p>
+            <div style="background:white; padding:15px; border-radius:5px; margin-top:10px; border: 1px solid #e2e8f0;">
+                <p style="margin-bottom:8px;"><b>🎯 Target Level:</b> {plan.get('target_level')}</p>
+                <p style="margin-bottom:8px;"><b>💡 Strategic Rationale:</b> {plan.get('why_now')}</p>
+                <hr style="margin:15px 0; border:0; border-top: 1px solid #e2e8f0;">
+                <p style="margin-bottom:12px;"><b>🛠️ Proof Artifact (Mandatory Project):</b> <br><code style="color:#d97706; font-size:1.1em; background:#fff7ed; padding:4px 8px; border-radius:4px; display:block; margin-top:5px; border:1px dashed #fed7aa;">{plan.get('proof_artifact')}</code></p>
+                <p style="margin-bottom:8px;"><b>📚 Recommended Resources:</b><br>{' • '.join(plan.get('course_path', []))}</p>
+                <div style="background:#f8fafc; padding:10px; border-radius:4px; border: 1px solid #f1f5f9;">
+                    <p style="margin:0; font-size:0.9em; color:#64748b;"><b>📝 Final Verification Challenge:</b><br><i>"{plan.get('retest_prompt')}"</i></p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+ensure_state()
+
+st.markdown(
+    """
+    <div class="hero">
+        <h1>🛡️ SkillProof AI: Claim-to-Proof Agent</h1>
+        <p>Assess real proficiency from a JD and resume, identify gaps, and generate a personalized <b>Claim-to-Proof</b> learning roadmap.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+scored = st.session_state.scored
+summary = readiness_summary(scored) if scored else None
+learning_style = st.session_state.learning_style
+weekly_hours = st.session_state.weekly_hours
+roi = roi_projection(
+    st.session_state.candidates,
+    st.session_state.manual_minutes,
+    st.session_state.agent_minutes,
+    st.session_state.hourly_cost,
+)
+
+tabs = st.tabs(
+    [
+        "Inputs",
+        "Live Assessment",
+        "Personalized Learning Plan",
+        "Gap Analysis",
+        "Claim-to-Proof Ledger",
+        "ROI Dashboard",
+        "Export",
+        "Executive Summary",
+    ]
+)
+
+with tabs[0]:
+    st.subheader("Inputs")
+    st.markdown(
+        f'<div class="section-note">Upload {FORMAT_LABEL} files or paste text manually. Spreadsheets are flattened with row and column labels so ATS exports and skill matrices still become assessment evidence.</div>',
+        unsafe_allow_html=True,
+    )
+    left, right = st.columns(2)
+    with left:
+        st.markdown("**Job Description**")
+        jd_file = st.file_uploader(f"Upload JD as {FORMAT_LABEL}", type=UPLOAD_TYPES, key="jd_upload")
+        apply_upload("jd_text", jd_file)
+        st.session_state.jd_text = st.text_area(
+            "Paste or edit job description",
+            value=st.session_state.jd_text,
+            height=340,
+        )
+    with right:
+        st.markdown("**Candidate Resume**")
+        resume_file = st.file_uploader(f"Upload resume as {FORMAT_LABEL}", type=UPLOAD_TYPES, key="resume_upload")
+        apply_upload("resume_text", resume_file)
+        st.session_state.resume_text = st.text_area(
+            "Paste or edit candidate resume",
+            value=st.session_state.resume_text,
+            height=340,
+        )
+
+    if st.button("Extract required skills", type="primary"):
+        if not st.session_state.jd_text.strip() or not st.session_state.resume_text.strip():
+            st.warning("Paste both the JD and resume first.")
         else:
-            st.warning("Please upload files.")
+            analyze_inputs()
+            score_current_assessment() # Initial scoring based on resume evidence
+            st.success("Skills extracted! Reports and Personalized Learning Plan are now available. You can also start the Live Assessment for a deeper verification.")
 
-# --- Dashboard ---
-if st.session_state.analysis_done:
-    t1, t2, t3 = st.tabs(["?? Match Analysis", "?? AI Interview", "?? Final List"])
+    with st.expander("Quick demo controls", expanded=False):
+        st.button("Load sample inputs", use_container_width=True, on_click=load_sample)
+        st.button("Run sample end-to-end", use_container_width=True, on_click=run_sample)
 
-    with t1:
-        st.header(f"Role: {st.session_state.jd_data.get('job_title')}")
-        df = pd.DataFrame(st.session_state.ranked_candidates)
-        st.dataframe(df[['name', 'match_percentage', 'explanation', 'status']], use_container_width=True)
+    with st.expander("Why this is not a toy workflow", expanded=False):
+        st.dataframe(
+            [
+                {
+                    "Business workflow": "Recruiter receives JD/resume documents",
+                    "Covered by": "PDF, DOCX, TXT/MD upload or paste",
+                    "Impact": "Less manual copying before assessment",
+                },
+                {
+                    "Business workflow": "ATS or spreadsheet export",
+                    "Covered by": "CSV/XLSX ingestion with row and column context",
+                    "Impact": "Batch-style evidence can be converted into auditable text",
+                },
+                {
+                    "Business workflow": "Manager needs proof, not claims",
+                    "Covered by": "Question answers, evidence snippets, score breakdown, reason codes",
+                    "Impact": "Higher accuracy and fewer unstructured review cycles",
+                },
+            ],
+            hide_index=True,
+            use_container_width=True,
+        )
 
-    with t2:
-        st.header("AI Interview")
-        cand_name = st.selectbox("Interview Candidate", [c['name'] for c in st.session_state.ranked_candidates])
-        sel_cand = next(c for c in st.session_state.ranked_candidates if c['name'] == cand_name)
-        
-        if cand_name not in st.session_state.engagement_logs:
-            if st.button(f"Start Chat with {cand_name}"):
-                greet = generate_initial_greeting(st.session_state.jd_data, cand_name, gemini_api_key)
-                st.session_state.engagement_logs[cand_name] = [{"role": "assistant", "content": greet}]
-                st.rerun()
-        
-        if cand_name in st.session_state.engagement_logs:
-            for m in st.session_state.engagement_logs[cand_name]:
-                with st.chat_message(m["role"]): st.write(m["content"])
+    if st.session_state.assessment:
+        st.markdown("**Extracted skill matrix**")
+        st.dataframe(skill_matrix_rows(), hide_index=True, use_container_width=True)
+
+with tabs[1]:
+    render_skill_conversation()
+
+with tabs[3]:
+    st.subheader("Gap Analysis")
+    scored = st.session_state.scored
+    if not scored:
+        st.info("Extract skills in the Inputs tab to see the Gap Analysis.")
+    else:
+        if not st.session_state.conversation_complete:
+            st.warning("⚠️ This analysis is based on Resume Claims only. Complete the Live Assessment for verified proof.")
+        rows = []
+        for result in scored.skill_results:
+            rows.append(
+                {
+                    "Skill": result.name,
+                    "Score": result.total_score,
+                    "Level": result.level,
+                    "JD priority": result.criticality,
+                    "Evidence": evidence_status(result),
+                    "Gap priority": gap_priority(result),
+                    "Why chosen": skill_choice_reason(result),
+                    "Why gap was detected": gap_reason(result),
+                    "Notes": "; ".join(result.risk_flags) if result.risk_flags else "No major gap",
+                }
+            )
+        st.dataframe(rows, hide_index=True, use_container_width=True)
+
+        st.markdown("**Score breakdown**")
+        for result in scored.skill_results:
+            with st.expander(f"{result.name}: {result.total_score}/100 ({result.level})"):
+                st.write("Resume evidence:", f"{result.resume_evidence_score}/25")
+                st.write("Answer quality:", f"{result.assessment_score}/45")
+                st.write("Practical depth:", f"{result.depth_score}/20")
+                st.write("Confidence:", f"{result.confidence_score}/10")
+                st.write("Reason codes:", ", ".join(result.reason_codes))
+                st.write("Why this skill was chosen:", skill_choice_reason(result))
+                st.write("Why this gap was detected:", gap_reason(result))
+
+with tabs[4]:
+    st.subheader("Claim-to-Proof Ledger")
+    scored = st.session_state.scored
+    if not scored:
+        st.info("Extract skills in the Inputs tab to see the Claim-to-Proof Ledger.")
+    else:
+        if not st.session_state.conversation_complete:
+            st.warning("⚠️ This ledger shows Resume Claims only. Complete the Live Assessment to verify them.")
+        st.markdown(
+            '<div class="section-note">This is the audit trail: every resume claim is tied to JD priority, evidence, assessment proof, gap reason, and a concrete proof task.</div>',
+            unsafe_allow_html=True,
+        )
+        ledger = proof_ledger_rows(scored)
+        st.dataframe(ledger, hide_index=True, use_container_width=True)
+
+        for row in ledger:
+            with st.expander(f"{row['Skill claim']} | {row['Audit status']}"):
+                st.write("JD priority:", row["JD priority"])
+                st.write("Resume proof:", row["Resume proof"])
+                st.write("Assessment proof:", row["Assessment proof"])
+                st.write("Why it matters:", row["Why it matters"])
+                st.write("Proof task:", row["Proof task"])
+
+with tabs[2]:
+    st.subheader("Personalized Learning Plan")
+    scored = st.session_state.scored
+    if not scored:
+        st.info("Extract skills in the Inputs tab to see the Learning Plan.")
+    else:
+        if not st.session_state.conversation_complete:
+            st.warning("⚠️ This roadmap is based on Resume Claims. Complete the Live Assessment to refine your gaps.")
+        st.markdown(
+            '<div class="section-note">Turns assessment gaps into a practical roadmap: adjacent skills, courses, weekly effort, drills, and proof artifacts.</div>',
+            unsafe_allow_html=True,
+        )
+        settings_left, settings_right, ai_plan_col = st.columns([1, 1, 1.2])
+        with settings_left:
+            learning_style = st.selectbox(
+                "Preferred learning style",
+                ["Project-based", "Video-first", "Docs-first", "Practice drills"],
+                index=["Project-based", "Video-first", "Docs-first", "Practice drills"].index(st.session_state.learning_style),
+                key="learning_style_control",
+            )
+            st.session_state.learning_style = learning_style
+        with settings_right:
+            weekly_hours = st.slider(
+                "Available learning hours / week",
+                2,
+                20,
+                value=int(st.session_state.weekly_hours),
+                step=1,
+                key="weekly_hours_control",
+            )
+            st.session_state.weekly_hours = weekly_hours
+        with ai_plan_col:
+            st.caption("Use Gemini/OpenRouter for a richer roadmap. The local plan still works without an API key.")
+            plan_api_key = st.text_input(
+                "AI plan API key",
+                type="password",
+                value=st.session_state.question_api_key,
+                placeholder="Optional; secrets also work",
+                key="learning_plan_api_key",
+            )
+            if plan_api_key:
+                st.session_state.question_api_key = plan_api_key
+            if st.button("Generate AI-personalized roadmap", type="primary", use_container_width=True):
+                api_key, endpoint, model = question_ai_config()
+                if not api_key:
+                    st.session_state.ai_learning_plan_error = (
+                        "Add a Gemini/OpenRouter API key in the Live Assessment question engine or Streamlit secrets."
+                    )
+                    st.session_state.ai_learning_plan = []
+                else:
+                    try:
+                        st.session_state.ai_learning_plan = generate_personalized_learning_plan(
+                            scored,
+                            learning_style,
+                            weekly_hours,
+                            api_key,
+                            endpoint,
+                            model,
+                        )
+                        st.session_state.ai_learning_plan_error = ""
+                    except RuntimeError as error:
+                        st.session_state.ai_learning_plan = []
+                        st.session_state.ai_learning_plan_error = str(error)
+
+        st.markdown(f"Learning style: **{learning_style}** | Available time: **{weekly_hours} hrs/week**")
+
+        if st.session_state.ai_learning_plan_error:
+            st.warning(st.session_state.ai_learning_plan_error)
+        if st.session_state.ai_learning_plan:
+            st.markdown("**AI-personalized roadmap**")
+            render_ai_learning_plan(st.session_state.ai_learning_plan)
+            st.markdown("**Rubric-backed local plan**")
+
+        plans = learning_plan_rows(scored, learning_style, weekly_hours)
+        if not plans:
+            st.success("No major learning gaps found.")
+        for row in plans:
+            with st.expander(
+                f"{row['Skill']} | {row['Priority']} priority | {row['Timeline']}",
+                expanded=not bool(st.session_state.ai_learning_plan),
+            ):
+                st.write(row["Goal"])
+                st.write(row["Why this gap"])
+                st.write(
+                    "Adjacent skills:",
+                    ", ".join(row["Adjacent skills"]) if row["Adjacent skills"] else "related fundamentals",
+                )
+                st.write("Learning style adaptation:", row["Style tip"])
+                st.markdown("**Recommended course path**")
+                for resource in row["Course path"]:
+                    st.write(f"- {resource}")
+                st.markdown("**Practice drill**")
+                st.write(row["Practice drill"])
+                st.markdown("**5-day sprint**")
+                for step in row["Sprint plan"]:
+                    st.write(f"- {step}")
+                st.markdown("**Proof artifact**")
+                st.write(row["Proof artifact"])
+                st.write(row["Plan"])
+
+with tabs[5]:
+    st.subheader("ROI Dashboard")
+    st.markdown(
+        '<div class="section-note">Estimated business impact from replacing manual claim-checking with structured skill assessment.</div>',
+        unsafe_allow_html=True,
+    )
+    with st.expander("ROI assumptions", expanded=False):
+        roi_a, roi_b, roi_c, roi_d = st.columns(4)
+        with roi_a:
+            st.session_state.candidates = st.slider(
+                "Candidates / month",
+                10,
+                500,
+                value=int(st.session_state.candidates),
+                step=10,
+                key="candidates_control",
+            )
+        with roi_b:
+            st.session_state.manual_minutes = st.slider(
+                "Manual minutes",
+                20,
+                90,
+                value=int(st.session_state.manual_minutes),
+                step=5,
+                key="manual_minutes_control",
+            )
+        with roi_c:
+            st.session_state.agent_minutes = st.slider(
+                "SkillProof minutes",
+                5,
+                30,
+                value=int(st.session_state.agent_minutes),
+                step=1,
+                key="agent_minutes_control",
+            )
+        with roi_d:
+            st.session_state.hourly_cost = st.slider(
+                "Reviewer cost / hour (INR)",
+                300,
+                3000,
+                value=int(st.session_state.hourly_cost),
+                step=100,
+                key="hourly_cost_control",
+            )
+    roi = roi_projection(
+        st.session_state.candidates,
+        st.session_state.manual_minutes,
+        st.session_state.agent_minutes,
+        st.session_state.hourly_cost,
+    )
+    r1, r2, r3, r4 = st.columns(4)
+    with r1:
+        metric_card("Cost saved", f"INR {roi['monthly_cost_saved']:,}", "Estimated monthly review cost saved.")
+    with r2:
+        metric_card("Throughput gain", f"{roi['throughput_gain']}x", "More candidates assessed in the same time.")
+    with r3:
+        metric_card("Time saved", f"{roi['monthly_hours_saved']} hrs", "Estimated monthly hours saved.")
+    with r4:
+        metric_card("Accuracy improved", f"+{accuracy_lift_estimate(scored)}%", "Estimated lift from evidence and answer coverage.")
+
+    st.dataframe(
+        [
+            {
+                "Metric": "Manual process",
+                "Value": f"{st.session_state.manual_minutes} minutes per candidate",
+                "Meaning": "Resume claims checked manually.",
+            },
+            {
+                "Metric": "SkillProof process",
+                "Value": f"{st.session_state.agent_minutes} minutes per candidate",
+                "Meaning": "Structured assessment plus explainable scoring.",
+            },
+            {
+                "Metric": "Monthly cost saved",
+                "Value": f"INR {roi['monthly_cost_saved']:,}",
+                "Meaning": "Based on candidate volume, time saved, and hourly cost assumptions.",
+            },
+            {
+                "Metric": "Estimated accuracy improved",
+                "Value": f"+{accuracy_lift_estimate(scored)}%",
+                "Meaning": "Heuristic lift from evidence coverage, answers, and reason codes.",
+            },
+        ],
+        hide_index=True,
+        use_container_width=True,
+    )
+
+with tabs[6]:
+    st.subheader("Export")
+    scored = st.session_state.scored
+    if not scored:
+        st.info("Score the assessment first.")
+    else:
+        report = build_markdown_report(scored)
+        st.markdown("**Report preview**")
+        st.markdown(report)
+        st.download_button(
+            "Download assessment report",
+            data=report,
+            file_name="skillproof-assessment-report.md",
+            mime="text/markdown",
+        )
+
+        with st.expander("Optional AI reviewer"):
+            st.caption(
+                "The app works without an API key. This optional reviewer sends only score summaries, reason codes, and learning-plan rows to Gemini/OpenRouter for calibration notes."
+            )
+            provider = st.selectbox(
+                "Provider",
+                ["Gemini", "OpenRouter", "Custom OpenAI-compatible"],
+                key="export_provider_select"
+            )
+            if provider == "Gemini":
+                default_endpoint = GEMINI_ENDPOINT
+                default_model = GEMINI_MODEL
+                key_names = ("GEMINI_API_KEY", "GOOGLE_API_KEY")
+            elif provider == "OpenRouter":
+                default_endpoint = OPENROUTER_ENDPOINT
+                default_model = OPENROUTER_MODEL
+                key_names = ("OPENROUTER_API_KEY",)
+            else:
+                default_endpoint = DEFAULT_ENDPOINT
+                default_model = DEFAULT_MODEL
+                key_names = ("OPENAI_COMPATIBLE_API_KEY",)
+
+            api_key = st.text_input(
+                "API key",
+                type="password",
+                value="",
+                placeholder="Optional; not stored in the repo",
+            )
+            endpoint = st.text_input(
+                "Endpoint",
+                value=secret_value("OPENAI_COMPATIBLE_URL", "OPENROUTER_URL", "GEMINI_URL") or default_endpoint,
+            )
+            model = st.text_input(
+                "Model",
+                value=secret_value("OPENAI_COMPATIBLE_MODEL", "OPENROUTER_MODEL", "GEMINI_MODEL") or default_model,
+            )
+            if st.button("Generate AI reviewer notes"):
+                resolved_key = api_key or secret_value(*key_names, "OPENAI_COMPATIBLE_API_KEY")
+                if not resolved_key:
+                    st.warning("Add an API key here or in Streamlit secrets to use the optional AI reviewer.")
+                else:
+                    try:
+                        st.session_state.ai_review = generate_ai_review(
+                            scored,
+                            learning_style,
+                            weekly_hours,
+                            resolved_key,
+                            endpoint,
+                            model,
+                        )
+                    except RuntimeError as error:
+                        st.error(str(error))
+
+            if st.session_state.ai_review:
+                st.markdown("**AI reviewer notes**")
+                st.markdown(st.session_state.ai_review)
+
+with tabs[7]:
+    st.subheader("Executive Summary")
+    scored = st.session_state.scored
+    if not scored:
+        st.info("Extract skills in the Inputs tab to see the Executive Summary.")
+    else:
+        # Recalculate summary locally for safety
+        summary = readiness_summary(scored)
+        if not summary:
+            st.error("Could not generate readiness summary. Please try extracting skills again.")
+        else:
+            st.markdown(
+                '<div class="section-note">Judge-facing snapshot: decision, proof coverage, main risk, next action, and business ROI in one view.</div>',
+                unsafe_allow_html=True,
+            )
             
-            if reply := st.chat_input("Reply..."):
-                st.session_state.engagement_logs[cand_name].append({"role": "user", "content": reply})
-                with st.spinner("AI typing..."):
-                    agent_res = get_agent_reply(st.session_state.engagement_logs[cand_name], st.session_state.jd_data, gemini_api_key)
-                    st.session_state.engagement_logs[cand_name].append({"role": "assistant", "content": agent_res})
-                st.rerun()
-            
-            if st.button("Finish & Score"):
-                score = evaluate_final_interest(st.session_state.engagement_logs[cand_name], gemini_api_key)
-                sel_cand['interest_score'] = score
-                sel_cand['status'] = "Interviewed"
-                st.success(f"Interest Score: {score}/100")
-                st.rerun()
+            top_cols = st.columns(4)
+            with top_cols[0]:
+                metric_card("Readiness status", str(summary.get("status", "Unknown")), "Final assessment status.")
+            with top_cols[1]:
+                metric_card("Overall score", f"{scored.overall_score}%", "Weighted by JD priority.")
+            with top_cols[2]:
+                metric_card("Proof-backed skills", str(summary.get("proof_backed_skills", 0)), "Verified evidence exists.")
+            with top_cols[3]:
+                metric_card("Skill gaps", str(summary.get("gap_count", 0)), "Below readiness threshold.")
 
-    with t3:
-        st.header("Final Shortlist")
-        for c in st.session_state.ranked_candidates:
-            c['final_score'] = (c['match_percentage'] * 0.7) + (c['interest_score'] * 0.3)
-        
-        fdf = pd.DataFrame(st.session_state.ranked_candidates).sort_values(by="final_score", ascending=False)
-        st.dataframe(fdf[['name', 'match_percentage', 'interest_score', 'final_score', 'status']], use_container_width=True)
+        executive = executive_summary(scored)
+        st.dataframe(
+            [
+                {"Signal": label, "What it means": value}
+                for label, value in executive.items()
+            ]
+            + [
+                {
+                    "Signal": "Estimated monthly cost saved",
+                    "What it means": f"INR {roi['monthly_cost_saved']:,} using current assumptions.",
+                },
+                {
+                    "Signal": "Estimated throughput gain",
+                    "What it means": f"{roi['throughput_gain']}x more candidates assessed.",
+                },
+                {
+                    "Signal": "Estimated accuracy lift",
+                    "What it means": f"+{accuracy_lift_estimate(scored)}% from evidence coverage.",
+                },
+            ],
+            hide_index=True,
+            use_container_width=True,
+        )

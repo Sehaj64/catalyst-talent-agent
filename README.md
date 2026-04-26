@@ -1,62 +1,79 @@
-# 🤖 Catalyst AI: Advanced Talent Agent
+# 🛡️ SkillProof AI: Claim-to-Proof Agent
 
-Catalyst AI is an autonomous recruiting agent that performs semantic matching between Job Descriptions and Resumes, followed by automated conversational engagement to qualify candidates.
+> A resume tells you what someone claims to know — not how well they actually know it.
 
-## 🚀 Features
-- **Semantic Matching**: Beyond keyword matching, it understands context using Gemini 1.5.
-- **Autonomous Engagement**: Generates dynamic interview questions based on JD requirements.
-- **ROI Ranking**: Combines technical fit and conversational interest into a final score.
+**SkillProof AI** is a production-minded talent assessment engine built for the Deccan AI Catalyst 2026 Hackathon. It conversationally assesses real proficiency, identifies gaps, and generates a personalized learning plan focused on adjacent skills.
 
-## 🛠️ Setup Instructions
+## 🚀 The "Why" and The Business ROI
+We built this agent to solve measurable business problems:
+1. **Cost Reduction**: Replaces expensive manual resume screening and 1st-round technical screening.
+2. **Accuracy Lift**: Moves away from "vibe-checks" and keyword matching to actual **conversational proof** using Senior Architect level scenarios.
+3. **Workflow Throughput**: Automatically generates a Claim-to-Proof Ledger and a concrete Learning Roadmap, enabling hiring managers to make fast, evidence-backed decisions.
 
-1. **Clone the repository**
-2. **Install dependencies**:
+## 🏗️ Architecture & Scoring Logic
+
+The system is built on an **Agentic AI** framework utilizing `gemini-2.5-pro` (the smartest model in the 2026 sandbox) acting as a Principal Systems Architect.
+
+```mermaid
+graph TD;
+    A[Upload JD & Resume] --> B[Skill Extraction Engine]
+    B --> C{Priority Filter}
+    C -->|Top 3 Skills| D[Dynamic Interviewer Agent]
+    D -->|Initial Scenario| E[Candidate Answer]
+    E --> F[Proof-Hunter Agent]
+    F -->|Vague Answer| G[Probe for Metrics/Details]
+    F -->|Strong Answer| H[Probe for Edge-Cases/Scale]
+    G --> I[Scoring Engine]
+    H --> I
+    I --> J[Claim-to-Proof Ledger]
+    I --> K[Career Architect Agent]
+    K --> L[Personalized Learning Plan]
+```
+
+### 🧠 The Scoring Logic
+Instead of a simple 1-10 rating, SkillProof uses a rigorous **100-point rubric**:
+- **Resume Evidence (Max 25):** Are their claims backed by the conversation?
+- **Answer Quality (Max 45):** Technical accuracy, specific tool mentions, and metrics.
+- **Practical Depth (Max 20):** Evidence of hands-on experience, tradeoffs, and troubleshooting.
+- **Confidence (Max 10):** Communication certainty and lack of "weak phrases".
+
+## ✨ Key Features
+- **God-Tier Prompts**: The AI is strictly instructed to NEVER repeat a topic and to push candidates on high-stakes failures (Memory Leaks, P99 Latency).
+- **Claim-to-Proof Ledger**: A transparent audit trail showing exactly which resume claims were proven and which were unproven.
+- **Zero-to-Expert Roadmaps**: The AI generates a customized learning plan with mandatory **Proof Artifacts** (mini-projects) instead of generic advice.
+
+## 💻 Local Setup Instructions
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/hackathon-deccan-ai/your-repo-name.git
+   cd catalyst_agent
+   ```
+
+2. **Install requirements:**
    ```bash
    pip install -r requirements.txt
    ```
-3. **Set up your API Key**:
-   - Create a `.streamlit/secrets.toml` file in the root directory.
-   - Add your Gemini API key:
-     ```toml
-     GEMINI_API_KEY = "your_google_api_key_here"
-     ```
-   - Alternatively, set an environment variable: `export GOOGLE_API_KEY="your_key_here"`
 
-4. **Run the app**:
+3. **Set your API Key:**
+   (Required to unlock the conversational assessment)
+   ```bash
+   export GEMINI_API_KEY="your_api_key_here"
+   ```
+
+4. **Run the App:**
    ```bash
    streamlit run app.py
    ```
 
-## 🔍 Troubleshooting
+## 🎥 Demo Video
+[Link to Demo Video] (Add your YouTube/Loom link here)
 
-If the application is "not working", check the following:
+## 📁 Sample Inputs & Outputs
+Included in the `sample-data/` folder:
+- `sample-jd.txt`: Senior AI Engineer JD
+- `sample-resume.txt`: High-impact candidate resume
+- *Outputs are generated dynamically in the UI tabs (Gap Analysis, Learning Plan).*
 
-### 1. API Key Issues
-- **Error**: "API Key Missing!"
-- **Fix**: Ensure `GEMINI_API_KEY` is in `.streamlit/secrets.toml` or `GOOGLE_API_KEY` is in your environment.
-
-### 2. Import Errors
-- **Error**: `ModuleNotFoundError: No module named 'src'`
-- **Fix**: We've added `sys.path.append` to `app.py` to fix this. Ensure you run the app from the root directory of the project.
-
-### 3. File Parsing Failures
-- **Error**: "Could not extract text from Job Description"
-- **Fix**: Ensure your PDFs/DOCX files are not password-protected or corrupted. The app now includes better error logging for these cases.
-
-### 4. AI Analysis Failures
-- **Error**: "AI Job Analysis failed" or "AI Match Calculation failed"
-- **Fix**: 
-  - Check your internet connection.
-  - Verify your Gemini API key has access to the `gemini-1.5-flash` model.
-  - The app now uses robust JSON parsing with fallbacks to handle inconsistent LLM responses.
-
-### 5. Dependency Issues
-- Ensure all packages in `requirements.txt` are installed. If you see errors related to `docx` or `pypdf`, try reinstalling them:
-  ```bash
-  pip install --force-reinstall python-docx pypdf
-  ```
-
-## 🏗️ Project Structure
-- `app.py`: Main Streamlit dashboard and UI logic.
-- `src/utils.py`: Core logic for file parsing, Gemini API interaction, and matching algorithms.
-- `requirements.txt`: List of required Python packages.
+---
+Built with ⚡ for Deccan AI Catalyst 2026.

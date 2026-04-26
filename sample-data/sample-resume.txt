@@ -1,0 +1,9 @@
+Arjun S. | Senior AI Engineer
+
+- Built a multi-agent RAG system for legal discovery, processing 10M+ documents with 94% retrieval accuracy.
+- Architected a high-throughput Python API using FastAPI and Celery, handling 2,000+ requests/sec with sub-100ms latency.
+- Developed a React/TypeScript analytics suite for MLOps monitoring, featuring real-time drift detection and SHAP/LIME visualizations.
+- Implemented automated LLM evaluation pipelines that reduced manual 'vibes-based' testing by 80%.
+- Migrated legacy monolithic data pipelines to a modern Snowflake/dbt stack, improving query performance by 4x.
+- Reduced cloud compute costs by $150k/year through strategic model quantization and aggressive caching strategies.
+- Published internal 'Clean Code for ML' standards and mentored a team of 12 engineers on CI/CD and testing best practices.

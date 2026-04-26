@@ -1,0 +1,15 @@
+Senior AI Systems Engineer (Generative AI & MLOps)
+
+We are seeking an elite engineer to architect our next-generation talent assessment engine. 
+The ideal candidate has deep expertise in building production-grade LLM applications, 
+orchestrating RAG pipelines, and implementing robust MLOps workflows.
+
+Key Responsibilities:
+- Design and scale distributed REST APIs in Python (FastAPI/Flask) for high-concurrency AI workloads.
+- Implement advanced RAG architectures using Vector Databases (Pinecone/Milvus) and semantic search.
+- Develop custom evaluation frameworks for LLM outputs (faithfulness, relevancy, toxicity).
+- Build interactive data visualization dashboards in React/TypeScript to surface talent insights.
+- Ensure 99.9% reliability through rigorous unit testing, integration testing, and CI/CD.
+
+Required: Python (Expert), React, TypeScript, SQL, LLM Orchestration (LangChain/LlamaIndex), 
+Cloud Infrastructure (AWS/GCP), and a proven track record of solving 'impossible' technical bottlenecks.
