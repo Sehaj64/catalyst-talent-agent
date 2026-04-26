@@ -65,17 +65,17 @@ def parse_json_object(text: str) -> dict[str, Any]:
         except: pass
     return {}
 
-def generate_assessment_question(skill: SkillCandidate, question: Question, api_key: str, endpoint: str, model: str, prior_turns: list[dict[str, str]] = None) -> dict[str, str]:
-    system = "You are a Principal Systems Architect. Ask exactly ONE deep technical question to verify the candidate's claim. No fluff. Return JSON: {\"question\": \"...\", \"interviewer_intent\": \"...\"}"
-    user = f"Skill: {skill.name}\nJD Mentions: {skill.jd_mentions[:2]}\nResume Claims: {skill.resume_evidence[:2]}"
+def generate_assessment_question(skill: SkillCandidate, question: Question, api_key: str, endpoint: str, model: str, seniority: str = "Mid-Level", prior_turns: list[dict[str, str]] = None) -> dict[str, str]:
+    system = f"You are a Principal Systems Architect. Your task is to verify a candidate's proficiency for a {seniority} role. Ask exactly ONE deep technical question to verify the candidate's claim. Adapting complexity to the {seniority} level. No fluff. Return JSON: {{\"question\": \"...\", \"interviewer_intent\": \"...\"}}"
+    user = f"Seniority Level: {seniority}\nSkill: {skill.name}\nJD Mentions: {skill.jd_mentions[:2]}\nResume Claims: {skill.resume_evidence[:2]}"
     
     res = call_gemini_native(api_key, system, user, prior_turns)
     data = parse_json_object(res)
-    return {"question": data.get("question", res), "interviewer_intent": data.get("interviewer_intent", "Verify depth")}
+    return {"question": data.get("question", res), "interviewer_intent": data.get("interviewer_intent", f"Verify depth at {seniority} level")}
 
-def generate_adaptive_follow_up(skill: SkillCandidate, question: Question, displayed_question: str, answer_text: str, api_key: str, endpoint: str, model: str) -> dict[str, str]:
-    system = "You are a Proof-Hunter. Audit the candidate's answer. If vague, demand metrics/details. If strong, throw a curveball. Return JSON: {\"response_feedback\": \"...\", \"follow_up\": \"...\"}"
-    user = f"Skill: {skill.name}\nQuestion Asked: {displayed_question}\nAnswer: {answer_text}"
+def generate_adaptive_follow_up(skill: SkillCandidate, question: Question, displayed_question: str, answer_text: str, api_key: str, endpoint: str, model: str, seniority: str = "Mid-Level") -> dict[str, str]:
+    system = f"You are a Proof-Hunter. Audit the candidate's answer for a {seniority} role. If vague, demand metrics/details appropriate for {seniority} expertise. If strong, throw a curveball. Return JSON: {{\"response_feedback\": \"...\", \"follow_up\": \"...\"}}"
+    user = f"Role Seniority: {seniority}\nSkill: {skill.name}\nQuestion Asked: {displayed_question}\nAnswer: {answer_text}"
     
     res = call_gemini_native(api_key, system, user)
     data = parse_json_object(res)

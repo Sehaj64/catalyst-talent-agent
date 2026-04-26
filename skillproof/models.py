@@ -27,6 +27,7 @@ class Assessment:
     jd_text: str
     resume_text: str
     skills: list[SkillCandidate]
+    seniority: str = "Mid-Level"
 
 
 @dataclass

@@ -335,6 +335,8 @@ def get_display_question(skill, question) -> str:
         st.session_state.llm_question_notes[answer_key(skill.name, question.prompt)] = "Gemini not configured"
         return fallback
 
+    seniority = st.session_state.assessment.seniority if st.session_state.assessment else "Mid-Level"
+
     try:
         generated = generate_assessment_question(
             skill,
@@ -342,11 +344,9 @@ def get_display_question(skill, question) -> str:
             api_key,
             endpoint,
             model,
+            seniority,
             recent_interview_turns(),
         )
-        # We still store it once per TURN, but the function itself is re-run
-        # The true fix for repetition is in the prompt (already added)
-        # But removing the 'if in cache' ensures we don't reuse old questions from other JD/Resumes.
         return generated["question"]
     except Exception as error:
         return fallback
@@ -364,6 +364,8 @@ def get_display_follow_up(skill, question, answer_text: str) -> str:
     if not api_key:
         return fallback
 
+    seniority = st.session_state.assessment.seniority if st.session_state.assessment else "Mid-Level"
+
     try:
         generated = generate_adaptive_follow_up(
             skill,
@@ -373,14 +375,13 @@ def get_display_follow_up(skill, question, answer_text: str) -> str:
             api_key,
             endpoint,
             model,
+            seniority
         )
         feedback = generated.get("response_feedback", "").strip()
         follow_up = generated["follow_up"].strip()
         message = f"{feedback}\n\n{follow_up}" if feedback else follow_up
         st.session_state.llm_follow_up_cache[key] = message
         return message
-    except RuntimeError:
-        return f"Thanks. I want to make that answer easier to verify.\n\n{fallback}"
     except Exception:
         return f"Thanks. I want to make that answer easier to verify.\n\n{fallback}"
 
@@ -392,12 +393,11 @@ def main_question_message(skill, question) -> str:
     total_steps = len(st.session_state.assessment.skills)
     
     displayed_question = get_display_question(skill, question)
-    source_note = st.session_state.llm_question_notes.get(question_cache_key(skill, question), "Local fallback")
+    seniority = st.session_state.assessment.seniority if st.session_state.assessment else "Mid-Level"
     
     return (
-        f"### Question {current_step} of {total_steps}\n"
+        f"### Question {current_step} of {total_steps} ({seniority} Level)\n"
         f"**Verifying Skill:** `{skill.name}`\n"
-        f"**Question Source:** {source_note}\n"
         f"**Resume Claim:** \"_{evidence}_\"\n\n"
         f"**Architect Scenario:**\n"
         f"{displayed_question}"

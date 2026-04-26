@@ -70,9 +70,24 @@ GENERIC_PHRASES = (
 SPECIFICITY_RE = re.compile(r"(\d+%|\d+\s*(users|hours|mins|minutes|seconds|x|tables|apis|models|projects))", re.I)
 
 
+def detect_seniority(jd_text: str) -> str:
+    text = jd_text.lower()
+    if any(w in text for w in ("senior", "architect", "lead", "principal", "staff", "manager", "head")):
+        return "Senior"
+    if any(w in text for w in ("junior", "fresher", "intern", "associate", "entry")):
+        return "Junior"
+    return "Mid-Level"
+
+
 def build_assessment(jd_text: str, resume_text: str) -> Assessment:
     skills = extract_candidates(jd_text, resume_text)
-    return Assessment(jd_text=jd_text, resume_text=resume_text, skills=skills)
+    seniority = detect_seniority(jd_text)
+    return Assessment(
+        jd_text=jd_text, 
+        resume_text=resume_text, 
+        skills=skills, 
+        seniority=seniority
+    )
 
 
 def answer_key(skill_name: str, prompt: str) -> str:
