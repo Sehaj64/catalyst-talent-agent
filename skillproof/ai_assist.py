@@ -66,15 +66,15 @@ def parse_json_object(text: str) -> dict[str, Any]:
     return {}
 
 def generate_assessment_question(skill: SkillCandidate, question: Question, api_key: str, endpoint: str, model: str, seniority: str = "Mid-Level", prior_turns: list[dict[str, str]] = None) -> dict[str, str]:
-    system = f"You are a Principal Systems Architect. Your task is to verify a candidate's proficiency for a {seniority} role. Ask exactly ONE deep technical question to verify the candidate's claim. Adapting complexity to the {seniority} level. No fluff. Return JSON: {{\"question\": \"...\", \"interviewer_intent\": \"...\"}}"
+    system = f"You are a Technical Interviewer. Your task is to verify a candidate's proficiency for a {seniority} role. Ask exactly ONE technical question to verify the candidate's claim. Adapting complexity to the {seniority} level. Return JSON: {{\"question\": \"...\", \"interviewer_intent\": \"...\"}}"
     user = f"Seniority Level: {seniority}\nSkill: {skill.name}\nJD Mentions: {skill.jd_mentions[:2]}\nResume Claims: {skill.resume_evidence[:2]}"
     
     res = call_gemini_native(api_key, system, user, prior_turns)
     data = parse_json_object(res)
-    return {"question": data.get("question", res), "interviewer_intent": data.get("interviewer_intent", f"Verify depth at {seniority} level")}
+    return {"question": data.get("question", res), "interviewer_intent": data.get("interviewer_intent", f"Verify {seniority} level expertise")}
 
 def generate_adaptive_follow_up(skill: SkillCandidate, question: Question, displayed_question: str, answer_text: str, api_key: str, endpoint: str, model: str, seniority: str = "Mid-Level") -> dict[str, str]:
-    system = f"You are a Proof-Hunter. Audit the candidate's answer for a {seniority} role. If vague, demand metrics/details appropriate for {seniority} expertise. If strong, throw a curveball. Return JSON: {{\"response_feedback\": \"...\", \"follow_up\": \"...\"}}"
+    system = f"You are a Technical Interviewer. Audit the candidate's answer for a {seniority} role. If vague, ask for specific metrics or details. If strong, ask about a tradeoff or edge case. Return JSON: {{\"response_feedback\": \"...\", \"follow_up\": \"...\"}}"
     user = f"Role Seniority: {seniority}\nSkill: {skill.name}\nQuestion Asked: {displayed_question}\nAnswer: {answer_text}"
     
     res = call_gemini_native(api_key, system, user)
@@ -83,11 +83,11 @@ def generate_adaptive_follow_up(skill: SkillCandidate, question: Question, displ
 
 def generate_personalized_learning_plan(scored: ScoredAssessment, learning_style: str, weekly_hours: int, api_key: str, endpoint: str, model: str) -> list[dict[str, Any]]:
     system = (
-        "You are a Senior Principal Architect and Technical Mentor. Create an ultra-structured 'Zero-to-Hero' roadmap.\n"
+        "You are a Technical Mentor. Create a structured upskilling roadmap.\n"
         "STRICT RULES:\n"
-        "1. GAP ANALYSIS: Explicitly state which technical signal was missing in the interview.\n"
-        "2. PROOF ARTIFACT: Define a complex, production-grade project (not a simple app) to prove mastery.\n"
-        "3. ACCURACY: Base everything on the provided assessment data. No fluff.\n"
+        "1. GAP ANALYSIS: State which technical signal was missing in the interview.\n"
+        "2. PROOF ARTIFACT: Define a technical project to prove mastery.\n"
+        "3. ACCURACY: Base everything on the provided assessment data.\n"
         "Return JSON: {\"plans\": [{\"skill\": \"...\", \"priority\": \"...\", \"gap_analysis\": \"...\", \"target_level\": \"...\", \"estimated_hours\": \"...\", \"course_path\": [], \"proof_artifact\": \"...\", \"retest_prompt\": \"...\"}]}"
     )
     user = json.dumps(assessment_payload(scored, learning_style, weekly_hours))
@@ -101,11 +101,11 @@ def generate_personalized_learning_plan(scored: ScoredAssessment, learning_style
 
 def generate_ai_review(scored: ScoredAssessment, learning_style: str, weekly_hours: int, api_key: str, endpoint: str, model: str) -> str:
     system = (
-        "You are a Forensic Technical Lead. Audit this candidate's 'Claim-to-Proof' journey.\n"
+        "You are a Technical Lead. Audit this candidate's assessment.\n"
         "1. IDENTIFY: Which resume claims were successfully proven?\n"
         "2. EXPOSE: Which claims were identified as risks/gaps?\n"
         "3. ROI: What is the business impact of hiring vs. upskilling this specific candidate?\n"
-        "Write 2 sharp, professional paragraphs."
+        "Write 2 professional paragraphs."
     )
     user = json.dumps(assessment_payload(scored, learning_style, weekly_hours))
     return call_gemini_native(api_key, system, user)

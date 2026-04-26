@@ -204,7 +204,7 @@ def run_sample() -> None:
 def analyze_inputs() -> None:
     api_key, _, _ = gemini_ai_config()
     if api_key:
-        with st.spinner("🔍 Performing Forensic Skill Extraction with Gemini 3 Pro..."):
+        with st.spinner("🔍 Analyzing Skills with Gemini..."):
              st.session_state.assessment = assessment_engine.extraction.extract_candidates_ai(
                 st.session_state.jd_text,
                 st.session_state.resume_text,
@@ -480,7 +480,7 @@ def handle_chat_reply(reply: str) -> None:
 
 
 def render_skill_conversation() -> None:
-    st.subheader("🛡️ Verifiable Skill Assessment")
+    st.subheader("🛡️ Skill Assessment")
     assessment = st.session_state.assessment
     if not assessment:
         st.info("Extract required skills from the Inputs tab first.")
@@ -492,13 +492,13 @@ def render_skill_conversation() -> None:
     st.info(f"⚡ **Current Protocol:** {conversation_progress()}. Answer with technical proof to unlock your validated roadmap.")
 
     st.markdown(
-        '<div class="section-note">SkillProof interviews one skill at a time. Live Assessment questions are generated with Gemini 3 Pro using the JD, resume evidence, recent answers, and the current candidate reply.</div>',
+        '<div class="section-note">SkillProof interviews one skill at a time. Questions are generated based on the JD, resume evidence, and previous answers.</div>',
         unsafe_allow_html=True,
     )
     live_api_key, live_endpoint, live_model = gemini_ai_config()
     gemini_ready = bool(live_api_key)
     with st.expander("Question engine", expanded=False):
-        st.write("Engine: Gemini 3 Pro (Architect Mode)")
+        st.write("Engine: Gemini")
 
     st.caption(conversation_progress())
     col_a, col_b, col_c, col_d = st.columns([1, 1, 1, 1])
@@ -707,25 +707,25 @@ with tabs[3]:
                 st.write("Why this gap was detected:", gap_reason(result))
 
 with tabs[4]:
-    st.subheader("🛡️ AI-Forensic Claim-to-Proof Ledger")
+    st.subheader("🛡️ Claim-to-Proof Ledger")
     scored = st.session_state.scored
     if not scored:
         st.info("Extract skills in the Inputs tab to see the Claim-to-Proof Ledger.")
     else:
         st.markdown(
-            '<div class="section-note">Forensic audit trail: Analyzing the gap between resume claims and verified technical signals.</div>',
+            '<div class="section-note">Audit trail: Analyzing the gap between resume claims and verified technical signals.</div>',
             unsafe_allow_html=True,
         )
         
         api_key, _, _ = gemini_ai_config()
         if api_key:
-            with st.spinner("🕵️ Conducting Forensic Audit with Gemini 3 Pro..."):
+            with st.spinner("🕵️ Running Audit with Gemini..."):
                 try:
                     audit = generate_ai_review(scored, st.session_state.learning_style, st.session_state.weekly_hours, api_key, GEMINI_ENDPOINT, GEMINI_MODEL)
                     st.markdown("### 📝 Auditor Verdict")
                     st.info(audit)
                 except:
-                    st.warning("Forensic summary generation delayed. Showing granular ledger.")
+                    st.warning("Summary generation delayed. Showing granular ledger.")
 
         st.divider()
         ledger = proof_ledger_rows(scored)
@@ -749,7 +749,7 @@ with tabs[2]:
         # AUTO-TRIGGER GEMINI FOR LEARNING PLAN
         api_key, endpoint, model = gemini_ai_config()
         if api_key and not st.session_state.ai_learning_plan and not st.session_state.ai_learning_plan_error:
-            with st.spinner("🧠 Gemini 3 Pro is architecting your personalized roadmap..."):
+            with st.spinner("🧠 Gemini is architecting your personalized roadmap..."):
                 try:
                     st.session_state.ai_learning_plan = generate_personalized_learning_plan(
                         scored,
