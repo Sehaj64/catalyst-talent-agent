@@ -100,7 +100,19 @@ def call_openai_compatible(
             with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
                 response_body = response.read().decode("utf-8")
             data = json.loads(response_body)
-            return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            
+            # Robust parsing of Gemini response
+            if "candidates" not in data or not data["candidates"]:
+                if "error" in data:
+                    raise RuntimeError(f"Gemini Error: {data['error'].get('message', 'Unknown error')}")
+                raise RuntimeError("Gemini returned no candidates. This usually means the prompt was blocked or filtered.")
+            
+            candidate = data["candidates"][0]
+            if "content" not in candidate:
+                finish_reason = candidate.get("finishReason", "Unknown")
+                raise RuntimeError(f"Gemini blocked the response. Reason: {finish_reason}")
+                
+            return candidate["content"]["parts"][0]["text"].strip()
         except urllib.error.HTTPError as error:
             detail = error.read().decode("utf-8", errors="ignore")
             raise RuntimeError(f"Gemini API request failed: HTTP {error.code}. {detail[:240]}") from error
