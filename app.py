@@ -310,7 +310,7 @@ def gemini_ai_config() -> tuple[str, str, str]:
 
 def ai_mode_status(api_key: str, endpoint: str, model: str) -> str:
     if not api_key:
-        return "AI mode: Gemini 2.5 Pro required (no Gemini key found)"
+        return "AI mode: Gemini 3 Pro required (no Gemini key found)"
     return f"AI mode: Gemini active ({model})"
 
 
@@ -479,13 +479,13 @@ def render_skill_conversation() -> None:
     st.info(f"⚡ **Current Protocol:** {conversation_progress()}. Answer with technical proof to unlock your validated roadmap.")
 
     st.markdown(
-        '<div class="section-note">SkillProof interviews one skill at a time. Live Assessment questions are generated with Gemini 2.5 Pro using the JD, resume evidence, recent answers, and the current candidate reply.</div>',
+        '<div class="section-note">SkillProof interviews one skill at a time. Live Assessment questions are generated with Gemini 3 Pro using the JD, resume evidence, recent answers, and the current candidate reply.</div>',
         unsafe_allow_html=True,
     )
     live_api_key, live_endpoint, live_model = gemini_ai_config()
     gemini_ready = bool(live_api_key)
     with st.expander("Question engine", expanded=False):
-        st.caption("Live Assessment uses Gemini 2.5 Pro from Streamlit secrets only.")
+        st.caption("Live Assessment uses Gemini 3 Pro from Streamlit secrets only.")
         st.caption(ai_mode_status(live_api_key, live_endpoint, live_model))
         if not gemini_ready:
             st.warning("Add GEMINI_API_KEY or GOOGLE_API_KEY in Streamlit secrets to start the Gemini live assessment.")
@@ -596,9 +596,9 @@ with tabs[0]:
     st.subheader("Inputs")
     inputs_api_key, _, _ = gemini_ai_config()
     if inputs_api_key:
-        st.success("⚡ **AI Engine Active:** Gemini 2.5 Pro (Principal Architect Mode)")
+        st.success("⚡ **AI Engine Active:** Gemini 3 Pro (Principal Architect Mode)")
     else:
-        st.warning("Gemini 2.5 Pro is not configured yet. Add GEMINI_API_KEY or GOOGLE_API_KEY in Streamlit secrets.")
+        st.warning("Gemini 3 Pro is not configured yet. Add GEMINI_API_KEY or GOOGLE_API_KEY in Streamlit secrets.")
     st.markdown(
         f'<div class="section-note">Upload {FORMAT_LABEL} files or paste text manually. Spreadsheets are flattened with row and column labels so ATS exports and skill matrices still become assessment evidence.</div>',
         unsafe_allow_html=True,
@@ -736,7 +736,7 @@ with tabs[2]:
         # AUTO-TRIGGER GEMINI FOR LEARNING PLAN
         api_key, endpoint, model = question_ai_config()
         if api_key and not st.session_state.ai_learning_plan and not st.session_state.ai_learning_plan_error:
-            with st.spinner("🧠 Gemini 2.5 Pro is architecting your personalized roadmap..."):
+            with st.spinner("🧠 Gemini 3 Pro is architecting your personalized roadmap..."):
                 try:
                     st.session_state.ai_learning_plan = generate_personalized_learning_plan(
                         scored,
@@ -773,7 +773,7 @@ with tabs[2]:
             )
             st.session_state.weekly_hours = weekly_hours
         with ai_plan_col:
-            st.caption("Uses Gemini 2.5 Pro from Streamlit secrets for a richer roadmap. The local plan still works without it.")
+            st.caption("Uses Gemini 3 Pro from Streamlit secrets for a richer roadmap. The local plan still works without it.")
             plan_status_api_key, plan_status_endpoint, plan_status_model = gemini_ai_config()
             st.caption(ai_mode_status(plan_status_api_key, plan_status_endpoint, plan_status_model))
             if not plan_status_api_key:
