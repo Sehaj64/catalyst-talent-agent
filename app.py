@@ -365,10 +365,15 @@ def get_display_question(skill, question) -> str:
 
     fallback = contextual_question_prompt(skill, question)
     if not st.session_state.ai_question_mode:
+        st.session_state.llm_question_notes[key] = "Local fallback: LLM toggle is off"
         return fallback
 
     api_key, endpoint, model = question_ai_config()
     if not api_key:
+        if "googleapis.com" in endpoint:
+            st.session_state.llm_question_notes[key] = "Local fallback: no Gemini key found"
+        else:
+            st.session_state.llm_question_notes[key] = "Local fallback: no API key found"
         return fallback
 
     try:
@@ -381,8 +386,10 @@ def get_display_question(skill, question) -> str:
             recent_interview_turns(),
         )
         st.session_state.llm_question_cache[key] = generated["question"]
-        if generated.get("interviewer_intent"):
-            st.session_state.llm_question_notes[key] = generated["interviewer_intent"]
+        if "googleapis.com" in endpoint:
+            st.session_state.llm_question_notes[key] = f"Gemini 2.5 Pro ({model})"
+        else:
+            st.session_state.llm_question_notes[key] = f"External provider ({model})"
         return generated["question"]
     except RuntimeError as error:
         st.session_state.llm_question_notes[key] = f"Local fallback: {error}"
@@ -434,10 +441,12 @@ def main_question_message(skill, question) -> str:
     total_steps = len(st.session_state.assessment.skills)
     
     displayed_question = get_display_question(skill, question)
+    source_note = st.session_state.llm_question_notes.get(question_cache_key(skill, question), "Local fallback")
     
     return (
         f"### Question {current_step} of {total_steps}\n"
         f"**Verifying Skill:** `{skill.name}`\n"
+        f"**Question Source:** {source_note}\n"
         f"**Resume Claim:** \"_{evidence}_\"\n\n"
         f"**Architect Scenario:**\n"
         f"{displayed_question}"

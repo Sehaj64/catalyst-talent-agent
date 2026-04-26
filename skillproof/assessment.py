@@ -98,21 +98,21 @@ def contextual_question_prompt(skill: SkillCandidate, question: Question) -> str
 
     if resume_context and jd_context:
         return (
-            f"The JD needs {skill_name}, and your resume says: \"{resume_context}\". "
-            f"Walk me through that work: what did you personally do, what was hard, "
-            f"and what result proved it worked?"
+            f"For {skill_name}, use this resume claim: \"{resume_context}\". "
+            f"Explain the exact artifact or decision you owned, the {signal_text or skill_name} constraint you handled, "
+            f"and the proof a reviewer could inspect to confirm it worked."
         )
     if resume_context:
         return (
             f"Your resume mentions {skill_name}: \"{resume_context}\". "
-            f"Pick that example and explain your exact contribution, the hardest decision, "
+            f"Describe the implementation detail you owned, one tradeoff you made, "
             f"and the measurable or observable outcome."
         )
     if jd_context:
         return (
             f"The JD asks for {skill_name} in this context: \"{jd_context}\". "
-            f"Describe the closest real task you have done, what you would build or analyze, "
-            f"and how you would prove quality in the first week."
+            f"Describe the closest real task you have done, the first {skill_name} artifact you would build or analyze, "
+            f"and the quality signal you would check in week one."
         )
     return (
         f"For {skill_name}, give me one real example that proves {signal_text}. "
