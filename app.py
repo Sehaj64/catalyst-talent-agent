@@ -648,6 +648,8 @@ tabs = st.tabs(
 
 with tabs[0]:
     st.subheader("Inputs")
+    if st.session_state.question_provider == "Gemini":
+        st.success("⚡ **AI Engine Active:** Gemini 2.5 Pro (Principal Architect Mode)")
     st.markdown(
         f'<div class="section-note">Upload {FORMAT_LABEL} files or paste text manually. Spreadsheets are flattened with row and column labels so ATS exports and skill matrices still become assessment evidence.</div>',
         unsafe_allow_html=True,

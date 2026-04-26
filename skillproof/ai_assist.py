@@ -82,7 +82,7 @@ def call_openai_compatible(
         # Native Gemini REST endpoint format
         url = f"{endpoint}?key={api_key}"
         body = {
-            "system_instruction": {"parts": [{"text": system_message}]},
+            "system_instruction": {"parts": [{"text": system_message + " DO NOT use any restricted or unsafe language. Stay focused on professional technical architecture. Do not use markdown formatting in the question itself."}]},
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
                 "temperature": temperature,
@@ -108,11 +108,13 @@ def call_openai_compatible(
                 raise RuntimeError("Gemini returned no candidates. This usually means the prompt was blocked or filtered.")
             
             candidate = data["candidates"][0]
-            if "content" not in candidate:
+            content = candidate.get("content")
+            if not content or "parts" not in content or not content["parts"]:
                 finish_reason = candidate.get("finishReason", "Unknown")
-                raise RuntimeError(f"Gemini blocked the response. Reason: {finish_reason}")
+                safety_ratings = candidate.get("safetyRatings", [])
+                raise RuntimeError(f"Gemini blocked or returned empty content. Reason: {finish_reason}. Safety: {safety_ratings}")
                 
-            return candidate["content"]["parts"][0]["text"].strip()
+            return content["parts"][0]["text"].strip()
         except urllib.error.HTTPError as error:
             detail = error.read().decode("utf-8", errors="ignore")
             raise RuntimeError(f"Gemini API request failed: HTTP {error.code}. {detail[:240]}") from error
