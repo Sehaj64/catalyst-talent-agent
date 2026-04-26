@@ -419,11 +419,16 @@ def start_live_conversation() -> None:
     if not st.session_state.assessment:
         return
     
-    # FINITE MODE: Top 5 most critical skills
+    # DYNAMIC BUT FINITE MODE: Only High & Medium skills, Max 5
     all_skills = st.session_state.assessment.skills
-    priority_order = {"High": 0, "Medium": 1, "Resume-only": 2}
-    sorted_skills = sorted(all_skills, key=lambda x: priority_order.get(x.criticality, 3))
-    st.session_state.assessment.skills = sorted_skills[:5] # Exactly 5 skills
+    important_skills = [s for s in all_skills if s.criticality in {"High", "Medium"}]
+    
+    # Sort by priority just in case
+    priority_order = {"High": 0, "Medium": 1}
+    sorted_important = sorted(important_skills, key=lambda x: priority_order.get(x.criticality, 2))
+    
+    # Cap at 5, but use the real number if less than 5
+    st.session_state.assessment.skills = sorted_important[:5] 
     
     st.session_state.conversation_started = True
     skill, question = current_conversation_item()
