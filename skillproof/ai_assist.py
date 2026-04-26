@@ -65,6 +65,58 @@ def build_reviewer_prompt(
     )
 
 
+def gemini_response_status(data: dict[str, Any], candidate: dict[str, Any] | None = None) -> str:
+    prompt_feedback = data.get("promptFeedback") if isinstance(data, dict) else None
+    prompt_feedback = prompt_feedback if isinstance(prompt_feedback, dict) else {}
+    block_reason = prompt_feedback.get("blockReason")
+    finish_reason = candidate.get("finishReason") if isinstance(candidate, dict) else None
+    safety = []
+    if isinstance(candidate, dict):
+        safety = candidate.get("safetyRatings") or []
+    if not safety:
+        safety = prompt_feedback.get("safetyRatings") or []
+    flagged = [
+        str(rating.get("category", "")).replace("HARM_CATEGORY_", "").lower()
+        for rating in safety
+        if isinstance(rating, dict) and rating.get("category")
+    ][:3]
+    details = []
+    if finish_reason:
+        details.append(f"finishReason={finish_reason}")
+    if block_reason:
+        details.append(f"blockReason={block_reason}")
+    if flagged:
+        details.append(f"safety={', '.join(flagged)}")
+    return "; ".join(details) if details else "No Gemini text was returned."
+
+
+def extract_gemini_text(data: dict[str, Any]) -> str:
+    if not isinstance(data, dict):
+        raise RuntimeError("Gemini returned a non-JSON response.")
+    if "error" in data:
+        error = data.get("error") if isinstance(data.get("error"), dict) else {}
+        raise RuntimeError(f"Gemini error: {error.get('message', 'Unknown error')}")
+
+    candidates = data.get("candidates")
+    if not isinstance(candidates, list) or not candidates:
+        raise RuntimeError(f"Gemini returned no candidates. {gemini_response_status(data)}")
+
+    candidate = candidates[0] if isinstance(candidates[0], dict) else {}
+    content = candidate.get("content") if isinstance(candidate, dict) else {}
+    content = content if isinstance(content, dict) else {}
+    parts = content.get("parts")
+    parts = parts if isinstance(parts, list) else []
+    texts = [
+        str(part.get("text", "")).strip()
+        for part in parts
+        if isinstance(part, dict) and str(part.get("text", "")).strip()
+    ]
+    if texts:
+        return "\n".join(texts).strip()
+
+    raise RuntimeError(f"Gemini returned no text parts. {gemini_response_status(data, candidate)}")
+
+
 def call_openai_compatible(
     api_key: str,
     endpoint: str,
@@ -81,8 +133,12 @@ def call_openai_compatible(
     if "googleapis.com" in endpoint:
         # Native Gemini REST endpoint format
         url = f"{endpoint}?key={api_key}"
+        gemini_system_message = (
+            f"{system_message} Stay focused on professional technical architecture. "
+            "Return plain JSON when JSON is requested."
+        )
         body = {
-            "system_instruction": {"parts": [{"text": system_message + " DO NOT use any restricted or unsafe language. Stay focused on professional technical architecture. Do not use markdown formatting in the question itself."}]},
+            "system_instruction": {"parts": [{"text": gemini_system_message}]},
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
                 "temperature": temperature,
@@ -100,26 +156,14 @@ def call_openai_compatible(
             with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
                 response_body = response.read().decode("utf-8")
             data = json.loads(response_body)
-            
-            # Robust parsing of Gemini response
-            if "candidates" not in data or not data["candidates"]:
-                if "error" in data:
-                    raise RuntimeError(f"Gemini Error: {data['error'].get('message', 'Unknown error')}")
-                raise RuntimeError("Gemini returned no candidates. This usually means the prompt was blocked or filtered.")
-            
-            candidate = data["candidates"][0]
-            content = candidate.get("content")
-            if not content or "parts" not in content or not content["parts"]:
-                finish_reason = candidate.get("finishReason", "Unknown")
-                safety_ratings = candidate.get("safetyRatings", [])
-                raise RuntimeError(f"Gemini blocked or returned empty content. Reason: {finish_reason}. Safety: {safety_ratings}")
-                
-            return content["parts"][0]["text"].strip()
+            return extract_gemini_text(data)
         except urllib.error.HTTPError as error:
             detail = error.read().decode("utf-8", errors="ignore")
             raise RuntimeError(f"Gemini API request failed: HTTP {error.code}. {detail[:240]}") from error
-        except Exception as error:
-            raise RuntimeError(f"Gemini API request failed: {error}") from error
+        except urllib.error.URLError as error:
+            raise RuntimeError(f"Gemini API request failed: {error.reason}") from error
+        except json.JSONDecodeError as error:
+            raise RuntimeError("Gemini API request failed: invalid JSON response.") from error
 
     # Default to OpenAI / OpenRouter format
     body = {

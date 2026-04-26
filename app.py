@@ -334,6 +334,18 @@ def gemini_ai_config() -> tuple[str, str, str]:
     return secret_value("GEMINI_API_KEY", "GOOGLE_API_KEY"), GEMINI_ENDPOINT, GEMINI_MODEL
 
 
+def ai_mode_status(api_key: str, endpoint: str, model: str, enabled: bool = True) -> str:
+    if not enabled:
+        return "AI mode: local fallback (LLM toggle is off)"
+    if not api_key:
+        if "googleapis.com" in endpoint:
+            return "AI mode: local fallback (no Gemini key found)"
+        return "AI mode: local fallback (no API key found)"
+    if "googleapis.com" in endpoint:
+        return f"AI mode: Gemini active ({model})"
+    return f"AI mode: external provider active ({model})"
+
+
 def recent_interview_turns(limit: int = 8) -> list[dict[str, str]]:
     turns = []
     for message in st.session_state.chat_messages[-limit:]:
@@ -543,6 +555,8 @@ def render_skill_conversation() -> None:
                     "Model",
                     value=st.session_state.question_model or DEFAULT_MODEL,
                 )
+        status_api_key, status_endpoint, status_model = question_ai_config()
+        st.caption(ai_mode_status(status_api_key, status_endpoint, status_model, st.session_state.ai_question_mode))
 
     st.caption(conversation_progress())
     col_a, col_b, col_c, col_d = st.columns([1, 1, 1, 1])
@@ -808,6 +822,8 @@ with tabs[2]:
             st.session_state.weekly_hours = weekly_hours
         with ai_plan_col:
             st.caption("Uses Gemini 2.5 Pro from Streamlit secrets for a richer roadmap. The local plan still works without it.")
+            plan_status_api_key, plan_status_endpoint, plan_status_model = gemini_ai_config()
+            st.caption(ai_mode_status(plan_status_api_key, plan_status_endpoint, plan_status_model))
             if st.button("Generate AI-personalized roadmap", type="primary", use_container_width=True):
                 api_key, endpoint, model = gemini_ai_config()
                 if not api_key:
