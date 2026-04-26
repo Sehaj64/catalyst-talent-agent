@@ -1,0 +1,12 @@
+[global]
+developmentMode = false
+
+[theme]
+base = "light"
+primaryColor = "#155EEF"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F5F7FA"
+textColor = "#111827"
+
+[server]
+headless = true

@@ -1,0 +1,7 @@
+Frontend AI Product Engineer
+
+We need a developer who can build production-minded assessment tools for hiring teams.
+Required skills: Python, React, TypeScript, REST APIs, testing, and clear communication.
+The role will work with LLM / Generative AI workflows, prompt evaluation, and data analysis dashboards.
+Must have strong experience turning messy business requirements into reliable user-facing software.
+Preferred: SQL, machine learning basics, and product workflow understanding.

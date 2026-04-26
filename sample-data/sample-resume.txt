@@ -1,0 +1,8 @@
+Sehaj Kumar
+
+Built a Python resume analyzer that parsed candidate profiles and generated structured reports.
+Implemented a React and TypeScript dashboard for project tracking with filters, reusable components, typed API responses, and REST API integration.
+Created data analysis notebooks using pandas and basic SQL joins for college placement insights.
+Worked on a GenAI chatbot prototype using prompts and retrieval-style context.
+Wrote unit tests for scoring utilities and documented setup steps for teammates.
+Improved project delivery speed by 30% by writing documentation, presenting tradeoffs to stakeholders, and fixing deployment issues.
