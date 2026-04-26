@@ -419,16 +419,18 @@ def start_live_conversation() -> None:
     if not st.session_state.assessment:
         return
     
-    # DYNAMIC BUT FINITE MODE: Only High & Medium skills, Max 5
-    all_skills = st.session_state.assessment.skills
+    # Create a fresh copy of important skills to avoid mutating cached objects
+    all_skills = list(st.session_state.assessment.skills)
     important_skills = [s for s in all_skills if s.criticality in {"High", "Medium"}]
     
-    # Sort by priority just in case
     priority_order = {"High": 0, "Medium": 1}
     sorted_important = sorted(important_skills, key=lambda x: priority_order.get(x.criticality, 2))
     
-    # Cap at 5, but use the real number if less than 5
-    st.session_state.assessment.skills = sorted_important[:5] 
+    # HARD LOCK: Exactly the top 5 important skills
+    interview_skills = sorted_important[:5]
+    
+    # Update the assessment object in session state with the limited list
+    st.session_state.assessment.skills = interview_skills
     
     st.session_state.conversation_started = True
     skill, question = current_conversation_item()
@@ -441,7 +443,7 @@ def move_to_next_question() -> None:
     if not assessment:
         return
 
-    # 1 Question per skill = Exactly 5 turns
+    # Force move to next skill (1 question per skill)
     st.session_state.conversation_skill_index += 1
     st.session_state.conversation_question_index = 0
 
