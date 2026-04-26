@@ -734,7 +734,7 @@ with tabs[2]:
             st.warning("⚠️ This roadmap is based on Resume Claims. Complete the Live Assessment to refine your gaps.")
         
         # AUTO-TRIGGER GEMINI FOR LEARNING PLAN
-        api_key, endpoint, model = question_ai_config()
+        api_key, endpoint, model = gemini_ai_config()
         if api_key and not st.session_state.ai_learning_plan and not st.session_state.ai_learning_plan_error:
             with st.spinner("🧠 Gemini 3 Pro is architecting your personalized roadmap..."):
                 try:
