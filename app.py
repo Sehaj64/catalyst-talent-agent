@@ -420,7 +420,7 @@ def main_question_message(skill, question) -> str:
     displayed_question = get_display_question(skill, question)
     
     return (
-        f"### 🛡️ Verification Step {current_step} of {total_steps}\n"
+        f"### Question {current_step} of {total_steps}\n"
         f"**Verifying Skill:** `{skill.name}`\n"
         f"**Resume Claim:** \"_{evidence}_\"\n\n"
         f"**Architect Scenario:**\n"
@@ -436,7 +436,7 @@ def conversation_progress() -> str:
     
     current = st.session_state.conversation_skill_index + 1
     total = len(st.session_state.assessment.skills)
-    return f"Current Progress: Step {current} of {total} (Focusing on top technical skills)"
+    return f"Current Progress: Question {current} of {total} (Focusing on top technical skills)"
 
 
 def start_live_conversation() -> None:
@@ -547,7 +547,7 @@ def render_skill_conversation() -> None:
             start_live_conversation()
             st.rerun()
     with col_b:
-        if st.button("Skip to next skill"):
+        if st.button("Skip to next question"):
             move_to_next_question()
             st.rerun()
     with col_c:
