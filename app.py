@@ -177,12 +177,9 @@ def run_sample() -> None:
     )
 
 
-@st.cache_data
-def cached_build_assessment(jd, resume):
-    return build_assessment(jd, resume)
-
 def analyze_inputs() -> None:
-    st.session_state.assessment = cached_build_assessment(
+    # No caching here to avoid mutating global state
+    st.session_state.assessment = build_assessment(
         st.session_state.jd_text,
         st.session_state.resume_text,
     )
@@ -386,32 +383,30 @@ def get_display_follow_up(skill, question, answer_text: str) -> str:
 
 def main_question_message(skill, question) -> str:
     evidence = skill.resume_evidence[0] if skill.resume_evidence else "No direct resume example found yet."
-    # Use skill index as the global question number (1 to 5)
-    question_number = st.session_state.conversation_skill_index + 1
-    total_questions = len(st.session_state.assessment.skills)
+    # Global step number
+    current_step = st.session_state.conversation_skill_index + 1
+    total_steps = len(st.session_state.assessment.skills)
+    
     displayed_question = get_display_question(skill, question)
+    
     return (
-        f"**Question {question_number} of {total_questions}**\n\n"
-        f"**Skill:** {skill.name} ({skill.criticality} priority)\n"
-        f"**Resume Context:** {evidence}\n\n"
-        f"--- \n"
+        f"### 🛡️ Verification Step {current_step} of {total_steps}\n"
+        f"**Verifying Skill:** `{skill.name}`\n"
+        f"**Resume Claim:** \"_{evidence}_\"\n\n"
+        f"**Architect Scenario:**\n"
         f"{displayed_question}"
     )
 
 
 def conversation_progress() -> str:
-    assessment = st.session_state.assessment
-    if not assessment:
-        return "No assessment started"
+    if not st.session_state.assessment:
+        return "No assessment in progress"
     if st.session_state.conversation_complete:
-        return "Assessment Complete"
-    skill, question = current_conversation_item()
-    if not skill or not question:
-        return "Ready"
+        return "✅ Verification Complete"
     
     current = st.session_state.conversation_skill_index + 1
-    total = len(assessment.skills)
-    return f"Progress: {current} of {total} technical scenarios"
+    total = len(st.session_state.assessment.skills)
+    return f"Current Progress: Step {current} of {total} (Focusing on top technical skills)"
 
 
 def start_live_conversation() -> None:
@@ -476,11 +471,17 @@ def handle_chat_reply(reply: str) -> None:
 
 def render_skill_conversation() -> None:
     st.subheader("🛡️ Verifiable Skill Assessment")
-    st.info("⚡ **Protocol:** I will ask exactly **5 deep technical scenario questions** (one per core skill). Answer with specific technical evidence to prove your proficiency.")
     assessment = st.session_state.assessment
     if not assessment:
         st.info("Extract required skills from the Inputs tab first.")
         return
+
+    # FINAL SAFEGUARD: Ensure the assessment being used is the limited one
+    if st.session_state.conversation_started and len(assessment.skills) > 5:
+         important_skills = [s for s in assessment.skills if s.criticality in {"High", "Medium"}]
+         st.session_state.assessment.skills = important_skills[:5]
+
+    st.info(f"⚡ **Current Protocol:** {conversation_progress()}. Answer with technical proof to unlock your validated roadmap.")
 
     st.markdown(
         '<div class="section-note">SkillProof interviews one skill at a time. With Gemini/OpenRouter, each question uses the JD, resume evidence, recent answers, and the current candidate reply.</div>',
