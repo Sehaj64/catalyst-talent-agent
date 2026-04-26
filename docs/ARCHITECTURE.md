@@ -17,6 +17,7 @@ flowchart TD
     J --> K["Personalized Learning Plan"]
     I --> L["Markdown Report Export"]
     I --> M["ROI Dashboard"]
+    I --> N["Optional AI Reviewer"]
 ```
 
 ## Components
@@ -100,6 +101,12 @@ The ROI dashboard estimates:
 - accuracy improvement from explainable evidence and assessment coverage
 
 These metrics connect the prototype to measurable business outcomes: cost reduction, accuracy lift, and workflow throughput.
+
+### Optional AI Reviewer
+
+`skillproof/ai_assist.py` adds a hybrid AI path. The core score remains local and deterministic, but the Export tab can call an OpenAI-compatible model to generate calibration notes from structured scores, reason codes, and learning-plan rows.
+
+This makes the app reliable without an API key while still allowing a deployed demo to show LLM-assisted review when a key is configured.
 
 ## Why This Is Explainable
 

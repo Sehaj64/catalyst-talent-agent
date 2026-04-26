@@ -88,6 +88,10 @@ Open **Export**.
 
 Show the final Markdown report and download button.
 
+Optionally open **AI reviewer** and say:
+
+"The core product works without an API key so judges can run it reliably. If a key is configured, the optional AI reviewer reads the structured scores and reason codes to produce semantic calibration notes without changing the auditable rubric."
+
 Close with:
 
 "SkillProof AI turns resume claims into assessed proficiency, visible gaps, and a realistic learning plan."

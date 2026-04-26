@@ -17,6 +17,16 @@ No API key is required for the default demo because the core scoring engine is d
 
 The app accepts pasted text, TXT/MD, PDF, DOCX, CSV, and XLSX uploads for both the JD and resume. CSV/XLSX files are flattened with row and column labels so ATS exports and candidate trackers remain auditable.
 
+Optional AI reviewer secrets:
+
+```toml
+OPENAI_COMPATIBLE_API_KEY = "..."
+OPENAI_COMPATIBLE_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENAI_COMPATIBLE_MODEL = "openrouter/auto"
+```
+
+The optional reviewer is only used from the Export tab. The main assessment flow works without these values.
+
 ## Local Run
 
 ```bash

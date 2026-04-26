@@ -23,6 +23,7 @@ A resume shows what someone claims to know, but not how well they know it. Skill
 - Builds a personalized learning plan with curated resources, time estimates, and proof tasks.
 - Shows ROI estimates for cost saved, accuracy improved, and throughput gains.
 - Exports a complete Markdown assessment report.
+- Includes an optional AI reviewer layer for semantic calibration notes when an API key is available.
 
 ## Architecture
 
@@ -92,6 +93,22 @@ The challenge is about measurable outcomes, not just a chatbot. SkillProof AI ma
 - Auditability: the exported report shows why each gap was detected and how to close it.
 
 The ROI dashboard estimates monthly cost saved, monthly hours saved, throughput gain, and accuracy improvement from evidence coverage, answer coverage, and reason codes.
+
+## Why It Runs Without An API Key
+
+The core assessment engine is deterministic and local. This makes the demo reliable: no rate limits, no hidden API costs, no model downtime, and no hallucinated score changes during judging.
+
+The app still supports optional LLM assistance. In the **Export** tab, an API key can enable an AI reviewer that reads only structured score summaries, reason codes, and learning-plan rows. It does not replace the rubric; it adds semantic calibration notes for the final report.
+
+Optional Streamlit secrets:
+
+```toml
+OPENAI_COMPATIBLE_API_KEY = "..."
+OPENAI_COMPATIBLE_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENAI_COMPATIBLE_MODEL = "openrouter/auto"
+```
+
+This hybrid design is the main differentiator: reliable scoring first, AI review second.
 
 ## Local Setup
 
@@ -174,7 +191,15 @@ skillproof-ai-catalyst/
 | Scoring / logic | Scoring section above and `skillproof/assessment.py` |
 | Sample inputs and outputs | `sample-data/` |
 
+## Differentiators
+
+- Multi-format intake for real hiring workflows: PDF, DOCX, TXT/MD, CSV, and XLSX.
+- Explainable scoring instead of a black-box chatbot answer.
+- Optional AI reviewer instead of mandatory API dependency.
+- ROI dashboard tied to cost, accuracy, and throughput.
+- Test coverage for scoring, report generation, and file parsing.
+
 ## Limitations
 
 - The current prototype uses deterministic scoring for reliable demos.
-- A production version should add benchmark question banks, LLM-assisted semantic grading, anti-cheating checks, and calibration against real assessment data.
+- A production version should add benchmark question banks, anti-cheating checks, and calibration against real assessment data.

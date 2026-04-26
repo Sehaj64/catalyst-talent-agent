@@ -3,6 +3,7 @@ from __future__ import annotations
 from io import BytesIO
 import unittest
 
+from skillproof.ai_assist import assessment_payload, build_reviewer_prompt
 from skillproof.assessment import build_assessment, score_assessment
 from skillproof.file_readers import read_file_bytes
 from skillproof.report import build_markdown_report, learning_plan_rows
@@ -57,6 +58,17 @@ class SkillProofTests(unittest.TestCase):
 
         self.assertIn("Python APIs", read_file_bytes("resume.docx", docx_buffer.getvalue()))
         self.assertIn("Skill: Testing", read_file_bytes("candidate.xlsx", xlsx_buffer.getvalue()))
+
+    def test_ai_reviewer_prompt_uses_structured_payload(self) -> None:
+        assessment = build_assessment(SAMPLE_JD, SAMPLE_RESUME)
+        scored = score_assessment(assessment, SAMPLE_ANSWERS)
+        payload = assessment_payload(scored, "Project-based", 6)
+        prompt = build_reviewer_prompt(scored, "Project-based", 6)
+
+        self.assertIn("overall_score", payload)
+        self.assertIn("Business Impact Story", prompt)
+        self.assertNotIn(SAMPLE_RESUME[:80], prompt)
+        self.assertNotIn(SAMPLE_JD[:80], prompt)
 
 
 if __name__ == "__main__":

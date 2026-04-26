@@ -13,6 +13,7 @@ Deadline: Monday, April 27, 2026 at 1:00 AM IST.
 - Architecture diagram: `README.md` and `docs/ARCHITECTURE.md`
 - Scoring / logic explanation: `README.md` and `skillproof/assessment.py`
 - Sample inputs and outputs: `sample-data/`
+- Optional AI reviewer: `skillproof/ai_assist.py`, shown in the Export tab
 - Repository access shared with `hackathon@deccan.ai`: pending after repo push
 
 ## Before Submitting

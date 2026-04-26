@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import importlib
+import os
 
 import streamlit as st
 
+from skillproof.ai_assist import DEFAULT_ENDPOINT, DEFAULT_MODEL, generate_ai_review
 from skillproof.assessment import answer_key, build_assessment, score_assessment
 import skillproof.file_readers as file_readers
 from skillproof.report import (
@@ -93,6 +95,7 @@ def ensure_state() -> None:
         "assessment": None,
         "answers": {},
         "scored": None,
+        "ai_review": "",
     }
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
@@ -127,6 +130,21 @@ def score_current_assessment() -> None:
         st.session_state.assessment,
         st.session_state.answers,
     )
+    st.session_state.ai_review = ""
+
+
+def secret_value(*names: str) -> str:
+    for name in names:
+        try:
+            value = st.secrets.get(name, "")
+        except Exception:
+            value = ""
+        if value:
+            return str(value)
+        value = os.getenv(name, "")
+        if value:
+            return value
+    return ""
 
 
 def apply_upload(target_key: str, uploaded_file) -> None:
@@ -448,3 +466,42 @@ with tabs[5]:
             file_name="skillproof-assessment-report.md",
             mime="text/markdown",
         )
+
+        with st.expander("Optional AI reviewer"):
+            st.caption(
+                "The app works without an API key. This optional reviewer sends only score summaries, reason codes, and learning-plan rows to an OpenAI-compatible endpoint for calibration notes."
+            )
+            api_key = st.text_input(
+                "API key",
+                type="password",
+                value="",
+                placeholder="Optional; not stored in the repo",
+            )
+            endpoint = st.text_input(
+                "Endpoint",
+                value=secret_value("OPENAI_COMPATIBLE_URL", "OPENROUTER_URL") or DEFAULT_ENDPOINT,
+            )
+            model = st.text_input(
+                "Model",
+                value=secret_value("OPENAI_COMPATIBLE_MODEL", "OPENROUTER_MODEL") or DEFAULT_MODEL,
+            )
+            if st.button("Generate AI reviewer notes"):
+                resolved_key = api_key or secret_value("OPENAI_COMPATIBLE_API_KEY", "OPENROUTER_API_KEY")
+                if not resolved_key:
+                    st.warning("Add an API key here or in Streamlit secrets to use the optional AI reviewer.")
+                else:
+                    try:
+                        st.session_state.ai_review = generate_ai_review(
+                            scored,
+                            learning_style,
+                            weekly_hours,
+                            resolved_key,
+                            endpoint,
+                            model,
+                        )
+                    except RuntimeError as error:
+                        st.error(str(error))
+
+            if st.session_state.ai_review:
+                st.markdown("**AI reviewer notes**")
+                st.markdown(st.session_state.ai_review)
