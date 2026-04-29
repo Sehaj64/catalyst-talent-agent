@@ -70,7 +70,10 @@ Instead of a simple rating, SkillProof uses a rigorous **Technical Rubric**:
    ```
 
 ## 🎥 Demo Video
-[https://www.loom.com/share/83e6136416f2475b91af3ea8d307d8dd] 
+https://www.loom.com/share/83e6136416f2475b91af3ea8d307d8dd
+
+## Live Link
+https://aiagent0.streamlit.app/
 
 ## 📁 Sample Inputs & Outputs
 Included in the `sample-data/` folder:
