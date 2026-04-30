@@ -49,7 +49,7 @@ Instead of a simple rating, SkillProof uses a rigorous **Technical Rubric**:
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/Sehaj64/SkillProof-.git
-   cd catalyst_agent
+   cd SkillProof-
    ```
 
 2. **Install requirements:**
